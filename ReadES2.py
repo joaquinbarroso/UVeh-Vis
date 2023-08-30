@@ -22,9 +22,6 @@ while True:
                         E= float(prev_line.split()[-1])
                         nm=h*c/(E*ev_to_joules)
                         nm_values.append(nm)
-            print(m)
-            print(nm_values)
-            print(osc_values)
     except FileNotFoundError:
         print("File not found. Please enter a valid filename.")
     except Exception as e:
