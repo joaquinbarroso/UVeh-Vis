@@ -5,8 +5,7 @@ while True:
     try:
         lambda1 = wl.split(',')[0]
         lambda2 = wl.split(',')[1]
-        datas=data.split(',')
-        with open(m, 'r') as file:
+        with open(data, 'r') as file:
             lines = file.readlines()
             osc_values = []
             nm_values =[]
@@ -26,5 +25,4 @@ while True:
     except Exception as e:
         print("An error occurred:", e)
     break
-
 
