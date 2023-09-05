@@ -1,6 +1,9 @@
-## Quick start
+## About
+UVeh_Vis is a tool for plotting 
 
-### Getting the source code
+# Quick start
+
+# Getting the source code
 
 Clone the repository:
 $ git clone https://github.com/joaquinbarroso/UVeh-Vis.git
