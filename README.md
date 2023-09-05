@@ -12,5 +12,5 @@ This will featch the entire repository called *UVeh-Vis*.
 By default it checks out the main branch.
 
 # UVeh-Vis requieres:
-*Python 3
-*Matplotlib
+Python 3
+Matplotlib
