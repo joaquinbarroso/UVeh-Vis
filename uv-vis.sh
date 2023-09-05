@@ -3,5 +3,5 @@
 
 chmod +x Plotter.py
 
-python3 Plotter.py
+pip install matplotlib
 
