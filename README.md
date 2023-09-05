@@ -1,5 +1,5 @@
 ## About
-UVeh_Vis is a utility designed for plotting UV-Vis spectra from QChem output files (and additional features coming soon). This tool operates by inputting the relevant file(s), specifying the initial and final wavelength, and providing the standard deviation.
+UVeh_Vis is a utility designed for plotting UV-Vis spectra from QChem output files (and additional features coming soon). This tool operates by entry the relevant file(s), specifying the initial and final wavelength, and providing the standard deviation.
 
 # Getting the source code
 
