@@ -14,3 +14,11 @@ By default it checks out the main branch.
 ## UVeh-Vis requieres:
 - Python 3
 - Matplotlib
+
+## Instructions
+After getting the source code: 
++ Run ./setup
++ Then ./UVeh-Vis
++ Enter file(s) name
++ Enter starting and final wavelenght (nm)
++ Enter standar deviation (eV)
