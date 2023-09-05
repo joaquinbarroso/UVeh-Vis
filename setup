@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-chmod +x Plotter.py
+chmod +x Plotter
 
 pip install matplotlib
 
