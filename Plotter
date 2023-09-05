@@ -1,3 +1,4 @@
+#!/bin/usr/python3
 import matplotlib.pyplot as plt
 import math as math
 with open('Read.py') as f:
