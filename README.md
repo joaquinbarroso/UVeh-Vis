@@ -18,7 +18,25 @@ By default it checks out the main branch.
 ## Instructions
 After getting the source code: 
 + Run ./setup
-+ Then ./UVeh-Vis
-+ Enter file(s) name
-+ Enter starting and final wavelenght (nm)
-+ Enter standar deviation (eV)
++ Copy the final line from output
++ Go to /home/_username_
++ Paste the line into ".bashrc" file
++ Exit terminal
++ Open a new terminal and type
+```bash
+$ UVeh-Vis -h
+```
++ Start using it
+
+## Usage
+UV-Vis Analyzer
+
+positional arguments:
+  files                 Input file(s), separated by spaces
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -wl WAVELENGTH, --wavelength WAVELENGTH
+                        Starting and final wavelength (nm), separated by a comma (,)
+  -dev DEVIATION, --deviation DEVIATION
+                        Standard deviation (eV), default is 0.4
