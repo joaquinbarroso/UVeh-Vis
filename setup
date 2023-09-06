@@ -6,9 +6,14 @@ chmod +x UVeh-Vis
 pip install matplotlib
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SCRIPT_DIR="${SCRIPT_DIR// /' '}"
+DIR_NAME="$(basename "$SCRIPT_DIR")"
+DIR_PATH="$(dirname "$SCRIPT_DIR")"
+
+if [[ "$DIR_NAME" == *" "* ]]; then
+  DIR_NAME="'$DIR_NAME'"
+fi
+SCRIPT_DIR="$DIR_PATH/$DIR_NAME"
 echo "Installation Done! :D"
 
 echo "Please add the following line to your ".bashrc" file located at /home"
 echo "alias UVeh-Vis='python3 $SCRIPT_DIR/UVeh-Vis'"
-
