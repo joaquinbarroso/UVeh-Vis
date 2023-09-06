@@ -10,5 +10,5 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo "Installation Done! :D"
 
 echo "Please add the following line to your ".bashrc" file located at /home"
-echo "alias UVeh-Vis='python3 $SCRIPT_DIR/UVeh-Vis"
+echo "alias UVeh-Vis='python3 $SCRIPT_DIR/UVeh-Vis'"
 
