@@ -30,12 +30,9 @@ add_single_quotes() {
 # Call the function to process the input path
 SCRIPT_DIR=$(add_single_quotes "$SCRIPT_DIR")
 
-# Print the result
-echo "Original Path: $input_path"
-echo "Result Path: $result_path"
 
 
 echo "Installation Done! :D"
 
 echo "Please add the following line to your ".bashrc" file located at /home"
-echo "alias UVeh-Vis='python3 $DIR_NAME/UVeh-Vis'"
+echo "alias UVeh-Vis='python3 $SCRIPT_DIR/UVeh-Vis'"
