@@ -1,25 +1,57 @@
 #!/usr/bin/python3
-import matplotlib.pyplot as plt
-import math as math
-with open('Read.py') as f:
-	exec(f.read())
-	a=len(datas)+1
-	for f in range (1,a):
-		exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")		
-ABS_"""+str(f)+" = []")
-		wavelenght=[]
-		deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
-		for i in range(int(lambda1),int(lambda2)+1):
-			wavelenght.append(i)
-			exec("ABSi_"+str(f)+"=0")
-			exec("for n in range(0,nstates_"+str(f)+"""):
-				exp=-1*(((1/i)-(1/nm_values_"""+str(f)+"""[n]))/(deviation/1e7))**2
-				ABSn=1.3062974e8*(osc_values_"""+str(f)+"""[n]/deviation)*math.exp(exp)
-				ABSi_"""+str(f)+"+=ABSn")
-			exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
-		exec("name=datas["+str(f-1)+"""].split(".")[0]
-plt.plot(wavelenght,ABS_"""+str(f)+",label=name)")
-plt.legend()
-plt.show()
+import argparse
+import subprocess
+import os, sys
+import argparse
+
+# Create an argument parser
+parser = argparse.ArgumentParser(description="UV-Vis Analyzer")
+
+# Add arguments for file names, wavelength range, and deviation
+parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
+parser.add_argument("-wl", "--wavelength", type=str, help="Starting and final wavelength (nm), separated by a comma (,)")
+parser.add_argument("-dev", "--deviation", type=float, default=0.4, help="Standard deviation (eV), default is 0.4")
+
+# Parse the command-line arguments
+args = parser.parse_args()
+wl = args.wavelength
+sys.path.append(os.getcwd())
+PATH=sys.path[0]
+if wl is None:
+    print("Error: You must provide a wavelength range using -wl or --wavelength.")
+# Save the values in variables
+else:
+    datas = args.files
+    dev = args.deviation
+    try:
+        lambda1 = wl.split(',')[0]
+        lambda2 = wl.split(',')[1]
+        a=0
+        for m in datas:
+            a+=1
+            m = os.path.abspath(m)
+            with open(m, 'r') as file:
+                lines = file.readlines()
+                exec("osc_values_"+str(a)+"= []")
+                exec("nm_values_"+str(a)+"=[]")
+                c = 2.998e8  # Speed of light in m/s
+                h = 6.626e-34  # Planck's constant in J*s
+                ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
+                for num, line in enumerate(lines):
+                    if 'Strength   :' in line:
+                        osc = float(line.split()[-1])
+                        exec("osc_values_"+str(a)+".append(osc)")
+                        prev_line = lines[num - 4].strip()
+                        E= float(prev_line.split()[-1])
+                        nm=h*c/(E*ev_to_joules)
+                        exec("nm_values_"+str(a)+".append(nm)")
+        PloPATH=PATH+'/Plotter.py'
+        with open(PloPATH) as f:
+            exec(f.read())
+    except FileNotFoundError:
+        print('File not found. Please enter a valid filename.')
+    except Exception as e:
+        print("An error occurred:", e)
+
 
 
