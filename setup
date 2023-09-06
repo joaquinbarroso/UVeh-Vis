@@ -6,13 +6,35 @@ chmod +x UVeh-Vis
 pip install matplotlib
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DIR_NAME="$(basename "$SCRIPT_DIR")"
-DIR_PATH="$(dirname "$SCRIPT_DIR")"
 
-if [[ "$DIR_NAME" == *" "* ]]; then
-  DIR_NAME="'$DIR_NAME'"
-fi
-SCRIPT_DIR="$DIR_PATH/$DIR_NAME"
+
+
+# Function to add single quotes around directory names with spaces
+add_single_quotes() {
+  local path=$1
+  local new_path=""
+  
+  IFS='/' read -ra path_components <<< "$path"
+  
+  for component in "${path_components[@]}"; do
+    if [[ $component == *" "* ]]; then
+      new_path="$new_path/'$component'"
+    else
+      new_path="$new_path/$component"
+    fi
+  done
+  
+  echo "$new_path"
+}
+
+# Call the function to process the input path
+SCRIPT_DIR=$(add_single_quotes "$SCRIPT_DIR")
+
+# Print the result
+echo "Original Path: $input_path"
+echo "Result Path: $result_path"
+
+
 echo "Installation Done! :D"
 
 echo "Please add the following line to your ".bashrc" file located at /home"
