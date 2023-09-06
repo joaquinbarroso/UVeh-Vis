@@ -28,15 +28,3 @@ $ UVeh-Vis -h
 ```
 + Start using it
 
-## Usage
-UV-Vis Analyzer
-
-positional arguments:
-  files                 Input file(s), separated by spaces
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -wl WAVELENGTH, --wavelength WAVELENGTH
-                        Starting and final wavelength (nm), separated by a comma (,)
-  -dev DEVIATION, --deviation DEVIATION
-                        Standard deviation (eV), default is 0.4
