@@ -18,7 +18,7 @@ add_single_quotes() {
   
   for component in "${path_components[@]}"; do
     if [[ $component == *" "* ]]; then
-      new_path="$new_path/'$component'"
+      new_path='$new_path/"$component"'
     else
       new_path="$new_path/$component"
     fi
