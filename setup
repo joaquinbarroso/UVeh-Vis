@@ -32,7 +32,10 @@ SCRIPT_DIR=$(add_single_quotes "$SCRIPT_DIR")
 
 
 
-echo "Installation Done! :D"
+echo "
 
+
+Installation Done! :D"
 echo "Please add the following line to your ".bashrc" file located at /home"
-echo "alias UVeh-Vis='python3 ${SCRIPT_DIR:1}/UVeh-Vis'"
+echo "alias UVeh-Vis='python3 ${SCRIPT_DIR:1}/UVeh-Vis'
+"
