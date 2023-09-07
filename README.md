@@ -17,14 +17,14 @@ By default it checks out the main branch.
 
 ## Citations:
 Please cite as:  
-"Emanuel Contreras-Cuevas, Humberto Estrada-Lara, Joaquín Barroso-Flores, "UVeh-Vis: a python tool for plotting UV-Vis spectra from excited states calculations" (2023) Git Hub https://github.com/joaquinbarroso/UVeh-Vis"
+*Emanuel Contreras-Cuevas, Humberto Estrada-Lara, Joaquín Barroso-Flores, "UVeh-Vis: a python tool for plotting UV-Vis spectra from excited states calculations" (2023) Git Hub https://github.com/joaquinbarroso/UVeh-Vis*
 
 ## Instructions
 After getting the source code: 
 1. Run $ ./setup
 2. Copy the final line from output
 3. Go to /home/_username_
-4. Paste the line into ".bashrc" file
+4. Paste the line into '.bashrc' file
 5. Exit terminal
 6. Open a new terminal and type
 ```bash
