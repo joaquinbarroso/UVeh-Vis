@@ -21,7 +21,7 @@ Please cite as:
 
 ## Instructions
 After getting the source code: 
-1. Run $./setup
+1. Run $ ./setup
 2. Copy the final line from output
 3. Go to /home/_username_
 4. Paste the line into ".bashrc" file
