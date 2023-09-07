@@ -36,3 +36,6 @@ $ UVeh-Vis -h
 ```
 + Start using it
 
+> [!NOTE]
+> Plot labels and title can be modified in Matplotlib GUI after plotting.
+
