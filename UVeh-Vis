@@ -45,6 +45,10 @@ else:
                         E= float(prev_line.split()[-1])
                         nm=h*c/(E*ev_to_joules)
                         exec("nm_values_"+str(a)+".append(nm)")
+        citePATH=PATH+'/cite'
+        with open(citePATH) as f:
+            exec(f.read())
+        time.sleep(2)
         PloPATH=PATH+'/Plotter.py'
         with open(PloPATH) as f:
             exec(f.read())
