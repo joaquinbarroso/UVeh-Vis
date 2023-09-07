@@ -27,7 +27,7 @@ After getting the source code:
 $ ./setup
 ```
 2. Copy the final line from output
-3. Go to /home/`username`
+3. Go to `/home/username`
 4. Paste the line into `.bashrc` file
 5. Exit terminal
 6. Open a new terminal and type
