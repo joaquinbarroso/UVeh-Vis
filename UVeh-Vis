@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import os, sys
 import argparse
+import time
 
 # Create an argument parser
 parser = argparse.ArgumentParser(description="UV-Vis Analyzer")
