@@ -21,12 +21,12 @@ Please cite as:
 
 ## Instructions
 After getting the source code: 
-+ Run ./setup
-+ Copy the final line from output
-+ Go to /home/_username_
-+ Paste the line into ".bashrc" file
-+ Exit terminal
-+ Open a new terminal and type
+1. Run $./setup
+2. Copy the final line from output
+3. Go to /home/_username_
+4. Paste the line into ".bashrc" file
+5. Exit terminal
+6. Open a new terminal and type
 ```bash
 $ UVeh-Vis -h
 ```
