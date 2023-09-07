@@ -16,7 +16,7 @@ By default it checks out the main branch.
 - Matplotlib
 
 ## Citations:
-Please cite as:__
+Please cite as:  
 "Emanuel Contreras-Cuevas, Humberto Estrada-Lara, Joaquín Barroso-Flores, "UVeh-Vis: a python tool for plotting UV-Vis spectra from excited states calculations" (2023) Git Hub https://github.com/joaquinbarroso/UVeh-Vis"
 
 ## Instructions
