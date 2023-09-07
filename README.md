@@ -14,6 +14,7 @@ By default it checks out the main branch.
 ## UVeh-Vis requieres:
 - Python 3
 - Matplotlib
+- Python 3 Pip
 
 ## Citations:
 Please cite as:  
@@ -21,7 +22,10 @@ Please cite as:
 
 ## Instructions
 After getting the source code: 
-1. Run $ ./setup
+1. Run
+```bash
+$ ./setup
+```
 2. Copy the final line from output
 3. Go to /home/_username_
 4. Paste the line into '.bashrc' file
