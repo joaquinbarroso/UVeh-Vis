@@ -17,8 +17,15 @@ ABS_"""+str(f)+" = []")
                 exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
         exec("name=datas["+str(f-1)+"""].split(".")[0]
 plt.plot(wavelenght,ABS_"""+str(f)+",label=name)")
+csv = args.table
 plt.legend()
-plt.show()
+if csv:
+        csvPATH=PATH+'/gen_csv'
+        with open(csvPATH) as f:  #15/01/24
+            exec(f.read())        #15/01/24
+        plt.show()
+else:
+        plt.show()
 
 
 
