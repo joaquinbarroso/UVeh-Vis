@@ -14,7 +14,7 @@ By default it checks out the main branch.
 ## UVeh-Vis requieres:
 - Python 3
 - Matplotlib
-- Python 3 Pip
+- pip (Python 3)
 
 ## Citations:
 Please cite as:  
