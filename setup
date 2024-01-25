@@ -1,15 +1,14 @@
 #!/bin/bash
 
-
+echo "Uploading permissions to main code..." 
 chmod +x UVeh-Vis
-
+echo "Installing dependencies..."
 pip install matplotlib
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
 
-# Function to add single quotes around directory names with spaces
 add_single_quotes() {
   local path=$1
   local new_path=""
