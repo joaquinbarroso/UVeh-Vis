@@ -10,11 +10,11 @@ parser = argparse.ArgumentParser(description="UV-Vis Analyzer")
 
 # Add arguments for file names, wavelength range, and deviation
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
-parser.add_argument("-wl", "--wavelength", type=str, help="Starting and final wavelength (nm), separated by a comma (,)")
+parser.add_argument("-wl", "--wavelength", required=True ,type=str, help="Starting and final wavelength (nm), separated by a comma (,)")
 parser.add_argument("-dev", "--deviation", type=float, default=0.4, help="Standard deviation (eV), default is 0.4")
 parser.add_argument("-csv", "--table", action='store_true', help="Creates a CSV file cointaining all file(s) absorbances")
 parser.add_argument("-gau", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
-parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment, default if gaussian")
+parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 
 # Parse the command-line arguments
 args = parser.parse_args()
