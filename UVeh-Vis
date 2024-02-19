@@ -30,6 +30,7 @@ else:
     try:
         lambda1 = wl.split(',')[0]
         lambda2 = wl.split(',')[1]
+        print('Reading Files...')
         a=0
         for m in datas:
             a+=1
@@ -63,7 +64,7 @@ else:
         with open(PloPATH) as f:
             exec(f.read())
     except FileNotFoundError:
-        print('File not found. Please enter a valid filename.')
+        print(datas[a-1]+': No such file or directory. Please enter a valid filename.')
     except Exception as e:
         print("An error occurred:", e)
 
