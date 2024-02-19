@@ -42,13 +42,19 @@ else:
                 h = 6.626e-34  # Planck's constant in J*s
                 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
                 for num, line in enumerate(lines):
-                    if 'Strength   :' in line:
-                        osc = float(line.split()[-1])
-                        exec("osc_values_"+str(a)+".append(osc)")
-                        prev_line = lines[num - 4].strip()
-                        E= float(prev_line.split()[-1])
-                        nm=h*c/(E*ev_to_joules)
-                        exec("nm_values_"+str(a)+".append(nm)")
+                        if 'Strength   :' in line: #Q-CHEM
+                            osc = float(line.split()[-1])
+                            exec("osc_values_"+str(a)+".append(osc)")
+                            prev_line = lines[num - 4].strip()
+                            E= float(prev_line.split()[-1])
+                            nm=h*c/(E*ev_to_joules)
+                            exec("nm_values_"+str(a)+".append(nm)")
+                        if ' f=' in line: #GAUSSIAN 09
+                            nm = float(line.split()[-4])
+                            exec("nm_values_"+str(a)+".append(nm)")
+                            osc = str(line.split()[-2])
+                            osc = float(osc.split('=')[-1])
+                            exec("osc_values_"+str(a)+".append(osc)")
         citePATH=PATH+'/cite'
         with open(citePATH) as f:
             exec(f.read())
