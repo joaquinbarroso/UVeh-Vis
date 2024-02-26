@@ -4,7 +4,10 @@ echo "Uploading permissions to main code..."
 chmod +x UVeh-Vis
 echo "Installing dependencies..."
 pip install matplotlib
+pip install pandas
+pip install numpy
 
+echo "Generating PATH of Installation..."
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
