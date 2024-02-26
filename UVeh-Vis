@@ -20,6 +20,17 @@ parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the 
 args = parser.parse_args()
 wl = args.wavelength
 sys.path.append(os.getcwd())
+def QC_prog(x):
+  with open(x, 'r') as file:
+    lines = file.readlines()
+    #print(lines[0:10])
+    global filetype
+    if '            Gaussian, Inc.  All Rights Reserved.\n' in lines:
+      filetype='Gaussian'
+    elif '                  Welcome to Q-Chem\n' in lines:
+      filetype='Q-Chem'
+    else:
+        filetype='Non'
 PATH=sys.path[0]
 if wl is None:
     print("Error: You must provide a wavelength range using -wl or --wavelength.")
@@ -32,30 +43,47 @@ else:
         lambda2 = wl.split(',')[1]
         print('Reading Files...')
         a=0
+        new_datas=datas
+        print(datas)
         for m in datas:
-            a+=1
             m = os.path.abspath(m)
-            with open(m, 'r') as file:
-                lines = file.readlines()
-                exec("osc_values_"+str(a)+"= []")
-                exec("nm_values_"+str(a)+"=[]")
-                c = 2.998e8  # Speed of light in m/s
-                h = 6.626e-34  # Planck's constant in J*s
-                ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
-                for num, line in enumerate(lines):
-                        if 'Strength   :' in line: #Q-CHEM
-                            osc = float(line.split()[-1])
-                            exec("osc_values_"+str(a)+".append(osc)")
-                            prev_line = lines[num - 4].strip()
-                            E= float(prev_line.split()[-1])
-                            nm=h*c/(E*ev_to_joules)
-                            exec("nm_values_"+str(a)+".append(nm)")
-                        if ' f=' in line: #GAUSSIAN 09
-                            nm = float(line.split()[-4])
-                            exec("nm_values_"+str(a)+".append(nm)")
-                            osc = str(line.split()[-2])
-                            osc = float(osc.split('=')[-1])
-                            exec("osc_values_"+str(a)+".append(osc)")
+            print(m)
+            if os.path.isfile(m):
+                a+=1
+                with open(m, 'r') as file:
+                    lines = file.readlines()
+                    exec("osc_values_"+str(a)+"= []")
+                    exec("nm_values_"+str(a)+"=[]")
+                    c = 2.998e8  # Speed of light in m/s
+                    h = 6.626e-34  # Planck's constant in J*s
+                    ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
+                    QC_prog(m)
+                    if filetype=='Q-Chem':
+                        print(m.split('/')[-1],'is a Q-Chem output file',a)
+                        for num, line in enumerate(lines):
+                            if 'Strength   :' in line: #Q-CHEM
+                                osc = float(line.split()[-1])
+                                exec("osc_values_"+str(a)+".append(osc)")
+                                prev_line = lines[num - 4].strip()
+                                E= float(prev_line.split()[-1])
+                                nm=h*c/(E*ev_to_joules)
+                                exec("nm_values_"+str(a)+".append(nm)")
+                    if filetype=='Gaussian':
+                        print(m.split('/')[-1],'is a Gaussian output file',a)
+                        for num, line in enumerate(lines):
+                            if ' f=' in line: #GAUSSIAN 09
+                                nm = float(line.split()[-4])
+                                exec("nm_values_"+str(a)+".append(nm)")
+                                osc = str(line.split()[-2])
+                                osc = float(osc.split('=')[-1])
+                                exec("osc_values_"+str(a)+".append(osc)")
+                    if filetype=='Non': #NO LEE LRC!!! MUST FIX!!!
+                        #a-=0
+                        m_part=m.split('/')[-1]
+                        print(m_part+': Filetype not supported',a)
+                        new_datas.remove(m_part.split('.')[0])
+        print(datas)
+        print('Saving Excited states information...')
         citePATH=PATH+'/cite'
         with open(citePATH) as f:
             exec(f.read())

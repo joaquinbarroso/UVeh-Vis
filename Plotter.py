@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 import matplotlib.pyplot as plt
 import math as math
-a=len(datas)+1
 lambda1=int(lambda1)
 lambda2=int(lambda2)
+a=len(datas)
 plt.figure(figsize=(12,6))
 plt.rcParams.update({'font.size': 13})
 ltz = args.lorentzian
-for f in range (1,a):
+for f in range (1,a+1):
         exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")            
 ABS_"""+str(f)+" = []")
         wavelenght=[]
@@ -39,8 +39,8 @@ plt.xlabel('Wavelenght /nm', size=15)
 plt.xlim(lambda1,lambda2)
 if csv:
         csvPATH=PATH+'/gen_csv'
-        with open(csvPATH) as f:  #15/01/24
-            exec(f.read())        #15/01/24
+        with open(csvPATH) as f:
+            exec(f.read())
         plt.show()
 else:
         plt.show()
