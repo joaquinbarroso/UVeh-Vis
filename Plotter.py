@@ -1,17 +1,22 @@
 #!/usr/bin/python3
 import matplotlib.pyplot as plt
 import math as math
-a=len(datas)+1
 lambda1=int(lambda1)
 lambda2=int(lambda2)
+a=len(datas)
 plt.figure(figsize=(12,6))
 plt.rcParams.update({'font.size': 13})
 ltz = args.lorentzian
-for f in range (1,a):
+if ltz:
+        print('\nUsing lorentzian adjustment...')
+else:
+        print('\nUsing gaussian adjustment...')
+deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
+print('\nCurrent deviation value is '+str(dev))
+for f in range (1,a+1):
         exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")            
 ABS_"""+str(f)+" = []")
         wavelenght=[]
-        deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
         if ltz:
                 for i in range(lambda1,lambda2+1):
                         wavelenght.append(i)
@@ -37,13 +42,18 @@ csv = args.table
 plt.legend(edgecolor='None')
 plt.xlabel('Wavelenght /nm', size=15)
 plt.xlim(lambda1,lambda2)
+with open(citePATH) as f:
+        exec(f.read())
+time.sleep(2)
 if csv:
         csvPATH=PATH+'/gen_csv'
-        with open(csvPATH) as f:  #15/01/24
-            exec(f.read())        #15/01/24
+        with open(csvPATH) as f:
+            exec(f.read())
         plt.show()
 else:
         plt.show()
+with open(issuePATH) as f:
+        exec(f.read())
 
 
 
