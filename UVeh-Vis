@@ -5,10 +5,8 @@ import os, sys
 import argparse
 import time
 
-# Create an argument parser
-parser = argparse.ArgumentParser(description="UV-Vis Analyzer")
 
-# Add arguments for file names, wavelength range, and deviation
+parser = argparse.ArgumentParser(description="UV-Vis Plotter")
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
 parser.add_argument("-wl", "--wavelength", required=True ,type=str, help="Starting and final wavelength (nm), separated by a comma (,)")
 parser.add_argument("-dev", "--deviation", type=float, default=0.4, help="Standard deviation (eV), default is 0.4")
@@ -16,14 +14,12 @@ parser.add_argument("-csv", "--table", action='store_true', help="Creates a CSV 
 parser.add_argument("-gau", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 
-# Parse the command-line arguments
 args = parser.parse_args()
 wl = args.wavelength
 sys.path.append(os.getcwd())
 def QC_prog(x):
   with open(x, 'r') as file:
     lines = file.readlines()
-    #print(lines[0:10])
     global filetype
     if '            Gaussian, Inc.  All Rights Reserved.\n' in lines:
       filetype='Gaussian'
@@ -31,35 +27,33 @@ def QC_prog(x):
       filetype='Q-Chem'
     else:
         filetype='Non'
+types = []
+unsupported_files = [] 
 PATH=sys.path[0]
+c = 2.998e8  # Speed of light in m/s
+h = 6.626e-34  # Planck's constant in J*s
+ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
 if wl is None:
     print("Error: You must provide a wavelength range using -wl or --wavelength.")
-# Save the values in variables
 else:
     datas = args.files
     dev = args.deviation
     try:
         lambda1 = wl.split(',')[0]
         lambda2 = wl.split(',')[1]
-        print('Reading Files...')
+        print('Reading Files...\n')
         a=0
-        new_datas=datas
-        print(datas)
         for m in datas:
             m = os.path.abspath(m)
-            print(m)
             if os.path.isfile(m):
                 a+=1
                 with open(m, 'r') as file:
                     lines = file.readlines()
                     exec("osc_values_"+str(a)+"= []")
                     exec("nm_values_"+str(a)+"=[]")
-                    c = 2.998e8  # Speed of light in m/s
-                    h = 6.626e-34  # Planck's constant in J*s
-                    ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
                     QC_prog(m)
                     if filetype=='Q-Chem':
-                        print(m.split('/')[-1],'is a Q-Chem output file',a)
+                        types.append(os.path.basename(m)+' is a Q-Chem output file')
                         for num, line in enumerate(lines):
                             if 'Strength   :' in line: #Q-CHEM
                                 osc = float(line.split()[-1])
@@ -68,8 +62,8 @@ else:
                                 E= float(prev_line.split()[-1])
                                 nm=h*c/(E*ev_to_joules)
                                 exec("nm_values_"+str(a)+".append(nm)")
-                    if filetype=='Gaussian':
-                        print(m.split('/')[-1],'is a Gaussian output file',a)
+                    elif filetype=='Gaussian':
+                        types.append(os.path.basename(m)+' is a Gaussian output file')
                         for num, line in enumerate(lines):
                             if ' f=' in line: #GAUSSIAN 09
                                 nm = float(line.split()[-4])
@@ -77,17 +71,25 @@ else:
                                 osc = str(line.split()[-2])
                                 osc = float(osc.split('=')[-1])
                                 exec("osc_values_"+str(a)+".append(osc)")
-                    if filetype=='Non': #NO LEE LRC!!! MUST FIX!!!
-                        #a-=0
-                        m_part=m.split('/')[-1]
-                        print(m_part+': Filetype not supported',a)
-                        new_datas.remove(m_part.split('.')[0])
-        print(datas)
-        print('Saving Excited states information...')
+                    elif filetype=='Non':
+                        a-=1
+                        m_part=os.path.basename(m)
+                        types.append(m_part+': Filetype not supported')
+                        print(m_part+': Filetype not supported')
+                        unsupported_files.append(m_part)
+            else:
+                print(os.path.basename(m), ': is not a file')
+                unsupported_files.append(os.path.basename(m))
+        if unsupported_files==[]:
+            print('File(s) correctly processed')
+        else:
+            for file in unsupported_files:
+                datas.remove(file)
+        #for i in types:
+        #    print(i)       Could be useful
+        print('\nSaving Excited states information...')
         citePATH=PATH+'/cite'
-        with open(citePATH) as f:
-            exec(f.read())
-        time.sleep(2)
+        issuePATH=PATH+'/issue_info'
         PloPATH=PATH+'/Plotter.py'
         with open(PloPATH) as f:
             exec(f.read())
