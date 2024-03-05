@@ -33,8 +33,11 @@ PATH=sys.path[0]
 c = 2.998e8  # Speed of light in m/s
 h = 6.626e-34  # Planck's constant in J*s
 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
-if wl is None:
-    print("Error: You must provide a wavelength range using -wl or --wavelength.")
+
+if len(wl.split(',')) == 1:
+    print("Error: You must provide a wavelength range separated by a comma e.g.  -wl 200,700")
+elif not wl.split(',')[0] < wl.split(',')[1]:
+    print('Error: Initial wavelenght must be lower than final wavelenght')
 else:
     datas = args.files
     dev = args.deviation
@@ -45,7 +48,7 @@ else:
         a=0
         for m in datas:
             m = os.path.abspath(m)
-            if os.path.isfile(m):
+            if not os.path.isdir(m):
                 a+=1
                 with open(m, 'r') as file:
                     lines = file.readlines()
@@ -87,12 +90,18 @@ else:
                 datas.remove(file)
         #for i in types:
         #    print(i)       Could be useful
-        print('\nSaving Excited states information...')
         citePATH=PATH+'/cite'
         issuePATH=PATH+'/issue_info'
         PloPATH=PATH+'/Plotter.py'
-        with open(PloPATH) as f:
-            exec(f.read())
+        if not datas==[]:
+            print('\nSaving Excited states information...')
+            with open(PloPATH) as f:
+                exec(f.read())
+        else:
+            with open(citePATH) as f:
+                exec(f.read())
+            time.sleep(1)
+            print('\nProvided files are not supported')
     except FileNotFoundError:
         print(datas[a-1]+': No such file or directory. Please enter a valid filename.')
     except Exception as e:
