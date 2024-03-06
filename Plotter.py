@@ -71,7 +71,7 @@ ABS_"""+str(f)+" = []")
 plt.plot(wavelenght,ABS_"""+str(f)+",label=name)")
 csv = args.table
 plt.legend(edgecolor='None')
-plt.xlabel('Wavelenght /nm', size=15)
+plt.xlabel('Wavelenght / nm', size=15)
 plt.xlim(lambda1,lambda2)
 with open(citePATH) as f:
         exec(f.read())
