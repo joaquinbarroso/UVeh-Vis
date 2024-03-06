@@ -8,14 +8,16 @@ def lotz(osc,nm,dev):
        sup=1.3062974e8*(2/math.pi)**0.5*osc*(dev/1e7)
        inf=((1/i)-(1/nm))**2+(dev/1e7)**2
        global ABSn
-       ABSn=sup/inf
+       ABSn1=sup/inf
+       ABSn=ABSn1/Norm
 def gau(osc,nm,dev):
         exp=-1*(((1/i)-(1/nm))/(dev/1e7))**2
         global ABSn
-        ABSn=1.3062974e8*(osc/dev)*math.exp(exp)
+        ABSn1=1.3062974e8*(osc/dev)*math.exp(exp)
+        ABSn=ABSn1/Norm
 ltz = args.lorentzian
 gaus = args.gaussian
-
+normal = args.normalized
 plt.figure(figsize=(12,6))
 plt.rcParams.update({'font.size': 13})
 deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
@@ -29,6 +31,16 @@ else:
         print('\nUsing Gaussian adjustment...')
         dist = 'Gaussian'
 print('\nCurrent deviation value is '+str(dev))
+Norm=1
+if normal:
+        print('\nNormalizing Spectra...')
+        osc,nm,dev,i=max_f,1,deviation,1
+        if dist == 'Lorentzian':
+                lotz(osc,nm,dev)
+                Norm=ABSn
+        if dist == 'Gaussian':
+                gau(osc,nm,dev)
+                Norm=ABSn
 for f in range (1,a+1):
         exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")            
 ABS_"""+str(f)+" = []")
@@ -59,7 +71,7 @@ ABS_"""+str(f)+" = []")
 plt.plot(wavelenght,ABS_"""+str(f)+",label=name)")
 csv = args.table
 plt.legend(edgecolor='None')
-plt.xlabel('Wavelenght /nm', size=15)
+plt.xlabel('Wavelenght / nm', size=15)
 plt.xlim(lambda1,lambda2)
 with open(citePATH) as f:
         exec(f.read())
@@ -71,5 +83,3 @@ if csv:
         plt.show()
 else:
         plt.show()
-with open(issuePATH) as f:
-        exec(f.read())
