@@ -11,3 +11,8 @@ _________________________________________________________
 |                                                       |
 —————————————————————————————————————————————————————————
 	''')
+time.sleep(1)
+print('''
+If you have any issue (or recommendation), you can upload it to the repository issues:
+https://github.com/joaquinbarroso/UVeh-Vis/issues
+	''')
