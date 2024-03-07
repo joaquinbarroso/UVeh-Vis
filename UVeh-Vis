@@ -2,7 +2,6 @@
 import argparse
 import subprocess
 import os, sys
-import argparse
 import time
 
 
@@ -11,9 +10,9 @@ parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces
 parser.add_argument("-wl", "--wavelength", required=True ,type=str, help="Starting and final wavelength (nm), separated by a comma (,)")
 parser.add_argument("-dev", "--deviation", type=float, default=0.4, help="Standard deviation (eV), default is 0.4")
 parser.add_argument("-csv", "--table", action='store_true', help="Creates a CSV file cointaining all file(s) absorbances")
-parser.add_argument("-gau", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
+parser.add_argument("-gau", "--gaussian", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
-
+parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
 args = parser.parse_args()
 wl = args.wavelength
 sys.path.append(os.getcwd())
@@ -33,8 +32,11 @@ PATH=sys.path[0]
 c = 2.998e8  # Speed of light in m/s
 h = 6.626e-34  # Planck's constant in J*s
 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
-if wl is None:
-    print("Error: You must provide a wavelength range using -wl or --wavelength.")
+
+if len(wl.split(',')) == 1:
+    print("Error: You must provide a wavelength range separated by a comma e.g.  -wl 200,700")
+elif not wl.split(',')[0] < wl.split(',')[1]:
+    print('Error: Initial wavelenght must be lower than final wavelenght')
 else:
     datas = args.files
     dev = args.deviation
@@ -42,10 +44,11 @@ else:
         lambda1 = wl.split(',')[0]
         lambda2 = wl.split(',')[1]
         print('Reading Files...\n')
+        all_osc=[]
         a=0
         for m in datas:
             m = os.path.abspath(m)
-            if os.path.isfile(m):
+            if not os.path.isdir(m):
                 a+=1
                 with open(m, 'r') as file:
                     lines = file.readlines()
@@ -62,6 +65,7 @@ else:
                                 E= float(prev_line.split()[-1])
                                 nm=h*c/(E*ev_to_joules)
                                 exec("nm_values_"+str(a)+".append(nm)")
+                        exec("all_osc.extend(osc_values_"+str(a)+")")
                     elif filetype=='Gaussian':
                         types.append(os.path.basename(m)+' is a Gaussian output file')
                         for num, line in enumerate(lines):
@@ -71,6 +75,7 @@ else:
                                 osc = str(line.split()[-2])
                                 osc = float(osc.split('=')[-1])
                                 exec("osc_values_"+str(a)+".append(osc)")
+                        exec("all_osc.extend(osc_values_"+str(a)+")")
                     elif filetype=='Non':
                         a-=1
                         m_part=os.path.basename(m)
@@ -80,6 +85,7 @@ else:
             else:
                 print(os.path.basename(m), ': is not a file')
                 unsupported_files.append(os.path.basename(m))
+        max_f=max(all_osc)
         if unsupported_files==[]:
             print('File(s) correctly processed')
         else:
@@ -87,12 +93,18 @@ else:
                 datas.remove(file)
         #for i in types:
         #    print(i)       Could be useful
-        print('\nSaving Excited states information...')
         citePATH=PATH+'/cite'
         issuePATH=PATH+'/issue_info'
         PloPATH=PATH+'/Plotter.py'
-        with open(PloPATH) as f:
-            exec(f.read())
+        if not datas==[]:
+            print('\nSaving Excited states information...')
+            with open(PloPATH) as f:
+                exec(f.read())
+        else:
+            with open(citePATH) as f:
+                exec(f.read())
+            time.sleep(1)
+            print('\nProvided files are not supported')
     except FileNotFoundError:
         print(datas[a-1]+': No such file or directory. Please enter a valid filename.')
     except Exception as e:
