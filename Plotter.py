@@ -21,26 +21,30 @@ normal = args.normalized
 plt.figure(figsize=(12,6))
 plt.rcParams.update({'font.size': 13})
 deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
+#Maximum det
+Norm=1
+osc,nm,dev,i=max_f,1,deviation,1
 if ltz:
         print('\nUsing Lorentzian adjustment...')
         dist = 'Lorentzian'
+        lotz(osc,nm,dev)
+        MAX=ABSn
 elif gaus:
         print('\nUsing Gaussian adjustment...')
         dist = 'Gaussian'
+        gau(osc,nm,dev)
+        MAX=ABSn
 else:
         print('\nUsing Gaussian adjustment...')
         dist = 'Gaussian'
+        gau(osc,nm,dev)
+        MAX=ABSn
 print('\nCurrent deviation value is '+str(dev))
-Norm=1
 if normal:
         print('\nNormalizing Spectra...')
-        osc,nm,dev,i=max_f,1,deviation,1
-        if dist == 'Lorentzian':
-                lotz(osc,nm,dev)
-                Norm=ABSn
-        if dist == 'Gaussian':
-                gau(osc,nm,dev)
-                Norm=ABSn
+        Norm=MAX
+ABS_tot=[]
+print(MAX)
 for f in range (1,a+1):
         exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")            
 ABS_"""+str(f)+" = []")
@@ -68,11 +72,38 @@ ABS_"""+str(f)+" = []")
                                 ABSi_"""+str(f)+"+=ABSn")
                         exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
         exec("name=datas["+str(f-1)+"""].split(".")[0]
-plt.plot(wavelenght,ABS_"""+str(f)+",label=name)")
+ABS_tot.append(ABS_"""+str(f)+")""")
+for f in range (0,a):
+        plt.plot(wavelenght,ABS_tot[f],label=datas[f-1].split(".")[0])
+multip = args.showmultiplicity
+if multip:             
+        yval= []
+        nm_range=[]
+        multip_range=[]
+        for n in range(0,a):
+                b_max=len(all_mult[n])
+                exec("nm_n = nm_values_"+str(n+1))
+                ABS_n=ABS_tot[n]
+                ABS_str =[str(x) for x in ABS_n]
+                nm_str =[str(x) for x in nm_n]
+                multip_n = all_mult[n]
+                for b in range(0,b_max):
+                        val=float(nm_str[b])
+                        if lambda1<val<lambda2: 
+                                nm_int=round(val)
+                                nm_range.append(nm_int)
+                                plot_ind=wavelenght.index(nm_int)
+                                ABS_val=float(ABS_str[plot_ind])
+                                yval.append(ABS_val)
+                                mult_val=multip_n[b]
+                                multip_range.append(mult_val)                                
+        for x in range(0,len(yval)):
+                plt.text(nm_range[x],yval[x],multip_range[x])
 csv = args.table
 plt.legend(edgecolor='None')
 plt.xlabel('Wavelenght / nm', size=15)
 plt.xlim(lambda1,lambda2)
+
 with open(citePATH) as f:
         exec(f.read())
 time.sleep(2)
