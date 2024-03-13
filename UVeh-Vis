@@ -13,6 +13,7 @@ parser.add_argument("-csv", "--table", action='store_true', help="Creates a CSV 
 parser.add_argument("-gau", "--gaussian", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
+parser.add_argument("-showm", "--showmultiplicity", action='store_true', help="Y values are normalized to the highest peak of all lines")
 args = parser.parse_args()
 wl = args.wavelength
 sys.path.append(os.getcwd())
@@ -32,6 +33,7 @@ PATH=sys.path[0]
 c = 2.998e8  # Speed of light in m/s
 h = 6.626e-34  # Planck's constant in J*s
 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
+multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
 
 if len(wl.split(',')) == 1:
     print("Error: You must provide a wavelength range separated by a comma e.g.  -wl 200,700")
@@ -45,6 +47,8 @@ else:
         lambda2 = wl.split(',')[1]
         print('Reading Files...\n')
         all_osc=[]
+        all_nm=[]
+        all_mult=[]
         a=0
         for m in datas:
             m = os.path.abspath(m)
@@ -54,6 +58,7 @@ else:
                     lines = file.readlines()
                     exec("osc_values_"+str(a)+"= []")
                     exec("nm_values_"+str(a)+"=[]")
+                    exec("mult_values_"+str(a)+"=[]")
                     QC_prog(m)
                     if filetype=='Q-Chem':
                         types.append(os.path.basename(m)+' is a Q-Chem output file')
@@ -62,10 +67,15 @@ else:
                                 osc = float(line.split()[-1])
                                 exec("osc_values_"+str(a)+".append(osc)")
                                 prev_line = lines[num - 4].strip()
+                                prev_block = lines[num -5:num]
+                                mult = [multiplicity.get(line.split(':')[-1].strip(), '') for line in prev_block if 'Multiplicity' in line]
+                                exec("mult_values_"+str(a)+".append(mult[0])")
                                 E= float(prev_line.split()[-1])
                                 nm=h*c/(E*ev_to_joules)
                                 exec("nm_values_"+str(a)+".append(nm)")
                         exec("all_osc.extend(osc_values_"+str(a)+")")
+                        exec("all_nm.append(nm_values_"+str(a)+")")
+                        exec("all_mult.append(mult_values_"+str(a)+")")
                     elif filetype=='Gaussian':
                         types.append(os.path.basename(m)+' is a Gaussian output file')
                         for num, line in enumerate(lines):
@@ -74,8 +84,13 @@ else:
                                 exec("nm_values_"+str(a)+".append(nm)")
                                 osc = str(line.split()[-2])
                                 osc = float(osc.split('=')[-1])
+                                mult = (line.split()[-7].split("-")[0])
+                                mult = multiplicity.get(mult)
+                                exec("mult_values_"+str(a)+".append(mult)")
                                 exec("osc_values_"+str(a)+".append(osc)")
                         exec("all_osc.extend(osc_values_"+str(a)+")")
+                        exec("all_nm.extend(nm_values_"+str(a)+")")
+                        exec("all_mult.append(mult_values_"+str(a)+")")
                     elif filetype=='Non':
                         a-=1
                         m_part=os.path.basename(m)
