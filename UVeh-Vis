@@ -5,11 +5,12 @@ import os, sys
 import time
 
 
-parser = argparse.ArgumentParser(description="UV-Vis Plotter")
+parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemitry calculations of Excited states',
+                                 epilog='Gaussian 09, 16 and Qchem 5.x files supported')
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
-parser.add_argument("-wl", "--wavelength", required=True ,type=str, help="Starting and final wavelength (nm), separated by a comma (,)")
-parser.add_argument("-dev", "--deviation", type=float, default=0.4, help="Standard deviation (eV), default is 0.4")
-parser.add_argument("-csv", "--table", action='store_true', help="Creates a CSV file cointaining all file(s) absorbances")
+parser.add_argument("-wl", dest='wavelength', metavar='i,f', required=True ,type=str, help="Starting (i) and final (f) wavelength in nm, separated by a comma (,)")
+parser.add_argument("-dev", dest='deviation', metavar='value', type=float, default=0.4, help="Standard deviation (eV), default is 0.4")
+parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, help="Creates a CSV file cointaining all file(s) absorbances")
 parser.add_argument("-gau", "--gaussian", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
