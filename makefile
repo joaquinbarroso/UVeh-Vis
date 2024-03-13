@@ -43,6 +43,7 @@ add_alias:
 	@echo "Alias added to $(bashrc)"
 	
 goodbye:
+	@rm makefile
 	@echo ""
 	@echo "Everthing done!"
 	@echo "To start using UVeh-Vis, please open a new terminal"
