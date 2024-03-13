@@ -101,9 +101,6 @@ else:
                 print(os.path.basename(m), ': is not a file')
                 unsupported_files.append(os.path.basename(m))
         max_f=max(all_osc)
-        print(all_osc)
-        print(all_nm)
-        print(max_f)
         if unsupported_files==[]:
             print('File(s) correctly processed')
         else:
