@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math as math
 lambda1=int(lambda1)
 lambda2=int(lambda2)
+max_f=max(all_osc)
 a=len(datas)
 def lotz(osc,nm,dev):
        sup=1.3062974e8*(2/math.pi)**0.5*osc*(dev/1e7)
@@ -15,36 +16,32 @@ def gau(osc,nm,dev):
         global ABSn
         ABSn1=1.3062974e8*(osc/dev)*math.exp(exp)
         ABSn=ABSn1/Norm
-ltz = args.lorentzian
-gaus = args.gaussian
-normal = args.normalized
+
 plt.figure(figsize=(12,6))
 plt.rcParams.update({'font.size': 13})
 deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
-#Maximum det
 Norm=1
-osc,nm,dev,i=max_f,1,deviation,1
+osc,nm,devi,i=max_f,1,deviation,1
 if ltz:
         print('\nUsing Lorentzian adjustment...')
         dist = 'Lorentzian'
-        lotz(osc,nm,dev)
+        lotz(osc,nm,devi)
         MAX=ABSn
 elif gaus:
         print('\nUsing Gaussian adjustment...')
         dist = 'Gaussian'
-        gau(osc,nm,dev)
+        gau(osc,nm,devi)
         MAX=ABSn
 else:
         print('\nUsing Gaussian adjustment...')
         dist = 'Gaussian'
-        gau(osc,nm,dev)
+        gau(osc,nm,devi)
         MAX=ABSn
 print('\nCurrent deviation value is '+str(dev))
 if normal:
         print('\nNormalizing Spectra...')
         Norm=MAX
 ABS_tot=[]
-print(MAX)
 for f in range (1,a+1):
         exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")            
 ABS_"""+str(f)+" = []")
@@ -72,10 +69,9 @@ ABS_"""+str(f)+" = []")
                                 ABSi_"""+str(f)+"+=ABSn")
                         exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
         exec("name=datas["+str(f-1)+"""].split(".")[0]
-ABS_tot.append(ABS_"""+str(f)+")""")
+ABS_tot.append(ABS_"""+str(f)+")")
 for f in range (0,a):
-        plt.plot(wavelenght,ABS_tot[f],label=datas[f-1].split(".")[0])
-multip = args.showmultiplicity
+        plt.plot(wavelenght,ABS_tot[f],label=datas[f].split(".")[0])
 if multip:             
         yval= []
         nm_range=[]
