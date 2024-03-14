@@ -4,6 +4,9 @@ import subprocess
 import os, sys
 import time
 
+c = 2.998e8  # Speed of light in m/s
+h = 6.626e-34  # Planck's constant in J*s
+ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
 
 parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemitry calculations of Excited states',
                                  epilog='Gaussian 09, 16 and Qchem 5.x files supported')
@@ -14,117 +17,171 @@ parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, help
 parser.add_argument("-gau", "--gaussian", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
-parser.add_argument("-showm", "--showmultiplicity", action='store_true', help="Y values are normalized to the highest peak of all lines")
+parser.add_argument("-showm", "--showmultiplicity", action='store_true', help="Each peak is labeled with the multiplicity of the resulting excited state")
 args = parser.parse_args()
+
+datas = args.files
 wl = args.wavelength
+wl=wl.split(',')
+dev = args.deviation
+ltz = args.lorentzian
+gaus = args.gaussian
+normal = args.normalized
+multip = args.showmultiplicity
+
+types = []
+unsupported_files = [] 
+all_osc=[]
+all_mult=[]
+multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
+ES_key = {'Gaussian': ' f=', 'Q-Chem': 'Strength   :'}
+
 sys.path.append(os.getcwd())
+PATH=sys.path[0]
+
 def QC_prog(x):
   with open(x, 'r') as file:
     lines = file.readlines()
-    global filetype
-    if '            Gaussian, Inc.  All Rights Reserved.\n' in lines:
-      filetype='Gaussian'
-    elif '                  Welcome to Q-Chem\n' in lines:
-      filetype='Q-Chem'
+    Gaussian,Qchem='            Gaussian, Inc.  All Rights Reserved.\n','                  Welcome to Q-Chem\n'
+    if Gaussian in lines:
+      filetype,stringtype='Gaussian',Gaussian
+    elif Qchem in lines:
+      filetype,stringtype='Q-Chem',Qchem
     else:
-        filetype='Non'
-types = []
-unsupported_files = [] 
-PATH=sys.path[0]
-c = 2.998e8  # Speed of light in m/s
-h = 6.626e-34  # Planck's constant in J*s
-ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
-multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
+        filetype,stringtype='Non','Non'
+    global njobs
+    njobs = lines.count(stringtype)
+    return filetype
+  
+def ES_check(x,filetype):
+    keyword=ES_key.get(filetype)
+    with open(x, 'r') as file:
+        lines=file.readlines()
+        nstates=0
+        ES_lines=[]
+        for num, line in enumerate(lines):
+            if keyword in line:
+                nstates+=1
+                ES_lines.append(num)
+    return nstates
 
-if len(wl.split(',')) == 1:
+
+
+
+
+
+citePATH=PATH+'/cite'
+issuePATH=PATH+'/issue_info'
+PloPATH=PATH+'/Plotter.py'
+
+if len(wl) == 1:
     print("Error: You must provide a wavelength range separated by a comma e.g.  -wl 200,700")
-elif not wl.split(',')[0] < wl.split(',')[1]:
+elif not wl[0] < wl[1]:
     print('Error: Initial wavelenght must be lower than final wavelenght')
-else:
-    datas = args.files
-    dev = args.deviation
-    try:
-        lambda1 = wl.split(',')[0]
-        lambda2 = wl.split(',')[1]
-        print('Reading Files...\n')
-        all_osc=[]
-        all_nm=[]
-        all_mult=[]
-        a=0
-        for m in datas:
-            m = os.path.abspath(m)
-            if not os.path.isdir(m):
-                a+=1
-                with open(m, 'r') as file:
-                    lines = file.readlines()
-                    exec("osc_values_"+str(a)+"= []")
-                    exec("nm_values_"+str(a)+"=[]")
-                    exec("mult_values_"+str(a)+"=[]")
-                    QC_prog(m)
-                    if filetype=='Q-Chem':
-                        types.append(os.path.basename(m)+' is a Q-Chem output file')
-                        for num, line in enumerate(lines):
-                            if 'Strength   :' in line: #Q-CHEM
-                                osc = float(line.split()[-1])
-                                exec("osc_values_"+str(a)+".append(osc)")
-                                prev_line = lines[num - 4].strip()
-                                prev_block = lines[num -5:num]
-                                mult = [multiplicity.get(line.split(':')[-1].strip(), '') for line in prev_block if 'Multiplicity' in line]
-                                exec("mult_values_"+str(a)+".append(mult[0])")
-                                E= float(prev_line.split()[-1])
-                                nm=h*c/(E*ev_to_joules)
-                                exec("nm_values_"+str(a)+".append(nm)")
-                        exec("all_osc.extend(osc_values_"+str(a)+")")
-                        exec("all_nm.append(nm_values_"+str(a)+")")
-                        exec("all_mult.append(mult_values_"+str(a)+")")
-                    elif filetype=='Gaussian':
-                        types.append(os.path.basename(m)+' is a Gaussian output file')
-                        for num, line in enumerate(lines):
-                            if ' f=' in line: #GAUSSIAN 09
-                                nm = float(line.split()[-4])
-                                exec("nm_values_"+str(a)+".append(nm)")
-                                osc = str(line.split()[-2])
-                                osc = float(osc.split('=')[-1])
-                                mult = (line.split()[-7].split("-")[0])
-                                mult = multiplicity.get(mult)
-                                exec("mult_values_"+str(a)+".append(mult)")
-                                exec("osc_values_"+str(a)+".append(osc)")
-                        exec("all_osc.extend(osc_values_"+str(a)+")")
-                        exec("all_nm.extend(nm_values_"+str(a)+")")
-                        exec("all_mult.append(mult_values_"+str(a)+")")
-                    elif filetype=='Non':
-                        a-=1
-                        m_part=os.path.basename(m)
-                        types.append(m_part+': Filetype not supported')
-                        print(m_part+': Filetype not supported')
-                        unsupported_files.append(m_part)
+lambda1 = wl[0]
+lambda2 = wl[1]
+
+print('Checking File(s)...\n')
+try:
+    for file in datas:
+        filename=file
+        file = os.path.abspath(file)
+        if os.path.isdir(file):
+            print(filename, ': is not a file')
+            unsupported_files.append(filename)
+        else:
+            filetype=QC_prog(file)
+            if filetype=='Non':
+                print(filename, ': Filetype not supported')
+                unsupported_files.append(filename)
             else:
-                print(os.path.basename(m), ': is not a file')
-                unsupported_files.append(os.path.basename(m))
-        max_f=max(all_osc)
-        if unsupported_files==[]:
-            print('File(s) correctly processed')
-        else:
-            for file in unsupported_files:
-                datas.remove(file)
-        #for i in types:
-        #    print(i)       Could be useful
-        citePATH=PATH+'/cite'
-        issuePATH=PATH+'/issue_info'
-        PloPATH=PATH+'/Plotter.py'
-        if not datas==[]:
-            print('\nSaving Excited states information...')
-            with open(PloPATH) as f:
-                exec(f.read())
-        else:
-            with open(citePATH) as f:
-                exec(f.read())
-            time.sleep(1)
-            print('\nProvided files are not supported')
-    except FileNotFoundError:
-        print(datas[a-1]+': No such file or directory. Please enter a valid filename.')
-    except Exception as e:
-        print("An error occurred:", e)
+                nstates=ES_check(file,filetype)
+                if nstates==0:
+                    print(filename, ': Error: No excited states found')
+                    unsupported_files.append(filename)
+                else:
+                    if njobs > 1:
+                        print(f'{filename}: File has {njobs} jobs')
+except FileNotFoundError:
+    print(filename+': No such file or directory. Please enter a valid filename.')
+    unsupported_files.append(filename)
+except Exception as e:
+    print("An error occurred:", e)
+
+if unsupported_files==[]:
+        print('\nFile(s) correctly processed')
+else:
+        for file in unsupported_files:
+            datas.remove(file)
+        unsupported_files=[]
+if not datas==[]:
+    print('\nChecking File(s)...Done')
+else:
+    with open(citePATH) as f:
+        exec(f.read())
+    time.sleep(1)
+    print('Error: None provided file(s) is supported, please check if your filetype is supported')
+    exit()
+
+
+print('Searching Excited states info...\n')
+a=0
+for m in datas:
+    m_name=m
+    m = os.path.abspath(m)
+    a+=1
+    with open(m, 'r') as file:
+        lines = file.readlines()
+        exec("osc_values_"+str(a)+"= []")
+        exec("nm_values_"+str(a)+"=[]")
+        exec("mult_values_"+str(a)+"=[]")
+        filetype=QC_prog(m)
+        if filetype=='Q-Chem':
+            types.append(m_name+' is a Q-Chem output file')
+            for num, line in enumerate(lines):
+                if 'Strength   :' in line:
+                    osc = float(line.split()[-1])
+                    exec("osc_values_"+str(a)+".append(osc)")
+                    prev_line = lines[num - 4].strip()
+                    prev_block = lines[num -5:num]
+                    mult = [multiplicity.get(line.split(':')[-1].strip(), '') for line in prev_block if 'Multiplicity' in line]
+                    exec("mult_values_"+str(a)+".append(mult[0])")
+                    E= float(prev_line.split()[-1])
+                    nm=h*c/(E*ev_to_joules)
+                    exec("nm_values_"+str(a)+".append(nm)")
+        elif filetype=='Gaussian':
+            types.append(m_name+' is a Gaussian output file')
+            for num, line in enumerate(lines):
+                if ' f=' in line:
+                    nm = float(line.split()[-4])
+                    exec("nm_values_"+str(a)+".append(nm)")
+                    osc = str(line.split()[-2])
+                    osc = float(osc.split('=')[-1])
+                    mult = (line.split()[-7].split("-")[0])
+                    mult = multiplicity.get(mult)
+                    exec("mult_values_"+str(a)+".append(mult)")
+                    exec("osc_values_"+str(a)+".append(osc)")
+    exec("all_osc.extend(osc_values_"+str(a)+")")
+    exec("all_mult.append(mult_values_"+str(a)+")")
+    if all_mult[a-1]==[]:
+        print(f'''{m_name}: No excited state found in file ''')
+        unsupported_files.append(filename)
+if not unsupported_files==[]:
+    for file in unsupported_files:
+        datas.remove(file)
+#for i in types:
+    #print(i)       #Could be useful
+if all_osc==[]:
+    with open(citePATH) as f:
+        exec(f.read())
+    print('Error: No excited states info found in provided file(s)')
+    exit()
+else:
+    print('\nSaving Excited states information...')
+    with open(PloPATH) as f:
+        exec(f.read())
+
+
 
 
 
