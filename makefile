@@ -25,6 +25,8 @@ check_dependencies:
 			pip3 install $$dep; \
 		fi \
 	done
+	@echo "Compiling reader..."
+	@gcc -shared -Wl,-soname,adder -o reader.so -fPIC reader.c
 	@echo ""
 	@echo "Installation done! :D"
 	@echo ""
@@ -43,7 +45,7 @@ add_alias:
 	@echo "Alias added to $(bashrc)"
 	
 goodbye:
-	@rm makefile
+	@rm makefile reader.c
 	@echo ""
 	@echo "Everthing done!"
 	@echo "To start using UVeh-Vis, please open a new terminal"
