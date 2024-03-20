@@ -8,16 +8,16 @@ c = 2.998e8  # Speed of light in m/s
 h = 6.626e-34  # Planck's constant in J*s
 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
 
-parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemitry calculations of Excited states',
+parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemistry calculations of Excited states',
                                  epilog='Gaussian 09, 16 and Qchem 5.x files supported',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
 parser.add_argument("-wl", dest='wavelength', metavar='i,f', default='450,750' ,type=str, help="Starting (i) and final (f) wavelength in nm, separated by a comma (,)")
 parser.add_argument("-dev", dest='deviation', metavar='value', type=float, default=0.4, help="Standard deviation (eV)")
 parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, nargs="?", const='Output.csv', help="Creates a CSV file containing all file(s) absorbances. Default is 'default.csv'")
-parser.add_argument("-gau", "--gaussian", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
+parser.add_argument("-gau", "--gaussian", action='store_true', default=True, help="Plot the UV-Vis spectra with Gaussian adjustment")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
-parser.add_argument("-showm",dest='showmultiplicity', metavar='percentaje', type=float, nargs="?", const=0.5, help="Each peak is labeled with the multiplicity of the resulting excited state")
+parser.add_argument("-showm",dest='showmultiplicity', metavar='percentaje', type=float, nargs="?", const=0.5, default=-1, help="Each peak above the percentaje is labeled with the multiplicity of the resulting excited state")
 parser.add_argument("-nosplit", dest="nosplit", action='store_true', help="If a multiple job file is provided, it won't be splitted")
 args = parser.parse_args()
 
@@ -31,7 +31,6 @@ normal = args.normalized
 multip = args.showmultiplicity
 csv = args.table
 nosplit=args.nosplit
-print(multip)
 
 types = []
 unsupported_files = [] 
