@@ -1,7 +1,6 @@
 #!/bin/usr/python3
-import numpy as np
 import pandas as pd
-head=['Wavelenght']
+head=[]
 array='A=np.array([wavelenght,'
 for f in range (1,a+1):
 	ABS_n='ABS_'+str(f)
@@ -13,6 +12,32 @@ for f in range (1,a+1):
 	head.append(datas[f-1].split(".")[0])
 exec(array)
 MAT=np.transpose(A)
-my_df=pd.DataFrame(MAT)
-my_df.to_csv(csv, index=False, header=head)
+output = []
+output.append("# UV-Vis Spectrum created by UVeh-Vis")
+output.append("# X-Axis:  Wavelength (nm)")
+output.append("# Y-Axis:  &epsilon;")
+output.append("")
+output.append("# Spectra")
+header='Wavelenght'
+for element in head:
+      element=f'	{element:<20.20}'
+      header+=element
+output.append(header)
 
+for row in MAT:
+    line=f"{row[0]:<8.8}	"
+    for f in range (1,a+1):
+        element=f"{str(row[f])[:20]:<020.20}	"   
+        line+=element
+    output.append(line)
+
+output.append("")
+
+
+# Save the output to a file
+output_file_path = csv
+with open(output_file_path, 'w') as file:
+    for line in output:
+        file.write(line + '\n')
+
+print(f"Output saved to {output_file_path}")

@@ -1,81 +1,76 @@
 #!/usr/bin/python3
 import matplotlib.pyplot as plt
 import math as math
-lambda1=int(lambda1)
-lambda2=int(lambda2)
-max_f=max(all_osc)
-a=len(datas)
+import numpy as np
+
 def lotz(osc,nm,dev):
        sup=1.3062974e8*(2/math.pi)**0.5*osc*(dev/1e7)
        inf=((1/i)-(1/nm))**2+(dev/1e7)**2
        global ABSn
-       ABSn1=sup/inf
-       ABSn=ABSn1/Norm
+       ABSn=sup/inf
+       return ABSn
 def gau(osc,nm,dev):
         exp=-1*(((1/i)-(1/nm))/(dev/1e7))**2
         global ABSn
-        ABSn1=1.3062974e8*(osc/dev)*math.exp(exp)
-        ABSn=ABSn1/Norm
+        ABSn=1.3062974e8*(osc/dev)*math.exp(exp)
+        return ABSn
+
+deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
+lambda1=int(lambda1)
+lambda2=int(lambda2)
+max_f=max(all_osc)
+a=len(datas)
+ABS_tot=[]
+Adj_key={'GaussianAdj': gau , 'LorentzianAdj' : lotz}
 
 plt.figure(figsize=(12,6))
 plt.rcParams.update({'font.size': 13})
-deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
-Norm=1
-osc,nm,devi,i=max_f,1,deviation,1
+
 if ltz:
         print('\nUsing Lorentzian adjustment...')
-        dist = 'Lorentzian'
-        lotz(osc,nm,devi)
-        MAX=ABSn
+        dist = 'LorentzianAdj'
 elif gaus:
         print('\nUsing Gaussian adjustment...')
-        dist = 'Gaussian'
-        gau(osc,nm,devi)
-        MAX=ABSn
+        dist = 'GaussianAdj'
 else:
         print('\nUsing Gaussian adjustment...')
-        dist = 'Gaussian'
-        gau(osc,nm,devi)
-        MAX=ABSn
+        dist = 'GaussianAdj'
 print('\nCurrent deviation value is '+str(dev))
-if normal:
-        print('\nNormalizing Spectra...')
-        Norm=MAX
-ABS_tot=[]
+Spec = Adj_key[dist]
+
 for f in range (1,a+1):
         exec("nstates_"+str(f)+"=len(nm_values_"+str(f)+""")            
 ABS_"""+str(f)+" = []")
         wavelenght=[]
-        if dist == 'Lorentzian':
-                for i in range(lambda1,lambda2+1):
-                        wavelenght.append(i)
-                        exec("ABSi_"+str(f)+"=0")
-                        exec("for n in range(0,nstates_"+str(f)+"""):
-                                osc = osc_values_"""+str(f)+"""[n]
-                                nm = nm_values_"""+str(f)+"""[n]
-                                dev = deviation
-                                lotz(osc,nm,dev)
-                                ABSi_"""+str(f)+"+=ABSn")
-                        exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
-        elif dist == 'Gaussian':
-                for i in range(lambda1,lambda2+1):
-                        wavelenght.append(i)
-                        exec("ABSi_"+str(f)+"=0")
-                        exec("for n in range(0,nstates_"+str(f)+"""):
-                                osc = osc_values_"""+str(f)+"""[n]
-                                nm = nm_values_"""+str(f)+"""[n]
-                                dev = deviation
-                                gau(osc,nm,dev)
-                                ABSi_"""+str(f)+"+=ABSn")
-                        exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
+        for i in range(lambda1,lambda2+1):
+                wavelenght.append(i)
+                exec("ABSi_"+str(f)+"=0")
+                exec("for n in range(0,nstates_"+str(f)+"""):
+                        osc = osc_values_"""+str(f)+"""[n]
+                        nm = nm_values_"""+str(f)+"""[n]
+                        dev = deviation
+                        ABSn=Spec(osc,nm,dev)
+                        ABSi_"""+str(f)+"+=ABSn")
+                exec("ABS_"+str(f)+".append(ABSi_"+str(f)+")")
         exec("name=datas["+str(f-1)+"""].split(".")[0]
 ABS_tot.append(ABS_"""+str(f)+")")
+
+y=np.array([np.array(xi) for xi in ABS_tot])
+MAX=y.max()
+
+if normal:
+        print('\nNormalizing Spectra...')
+        ABS_tot = [i/MAX for i in ABS_tot]
+        plt.ylabel('Normalized Absorbance', size=15)
+else:
+        plt.ylabel('$\\epsilon$ / $L$ $mol^{-1}$ $cm^{-1}$', size=15)
 for f in range (0,a):
         plt.plot(wavelenght,ABS_tot[f],label=datas[f].split(".")[0])
-if multip:             
+if multip >= 0.0:             
         yval= []
         nm_range=[]
         multip_range=[]
+        min_val= multip*MAX
         for n in range(0,a):
                 b_max=len(all_mult[n])
                 exec("nm_n = nm_values_"+str(n+1))
@@ -94,12 +89,14 @@ if multip:
                                 mult_val=multip_n[b]
                                 multip_range.append(mult_val)                                
         for x in range(0,len(yval)):
-                plt.text(nm_range[x],yval[x],multip_range[x])
-csv = args.table
+                if yval[x] > min_val:
+                        plt.text(nm_range[x],yval[x],multip_range[x])
 plt.legend(edgecolor='None')
 plt.xlabel('Wavelenght / nm', size=15)
 plt.xlim(lambda1,lambda2)
-
+if not temp_files==[]:
+        for x in temp_files:
+                os.remove(x) 
 with open(citePATH) as f:
         exec(f.read())
 time.sleep(2)
