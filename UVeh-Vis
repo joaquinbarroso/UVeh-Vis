@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import os, sys
 import time
+import ctypes
 
 c = 2.998e8  # Speed of light in m/s
 h = 6.626e-34  # Planck's constant in J*s
@@ -40,48 +41,54 @@ multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
 ES_key = {'Gaussian': ' f=', 'Q-Chem': 'Strength   :'}
 Prog_key = {'Gaussian':'            Gaussian, Inc.  All Rights Reserved.\n', 'Q-Chem': '                  Welcome to Q-Chem\n'}
 to_split=[]
-Gaussian,Qchem='            Gaussian, Inc.  All Rights Reserved.\n','                  Welcome to Q-Chem\n'
+Progs=['Gaussian','Q-Chem']
 temp_files=[]
 
 sys.path.append(os.getcwd())
 PATH=sys.path[0]
+lib_path=PATH+'/reader.so'
+lib = ctypes.CDLL(lib_path)
+
+lib.search_file.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
+lib.search_file.restype = ctypes.POINTER(ctypes.c_int)
+lib.export_lines.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
+lib.export_lines.restype = ctypes.POINTER(ctypes.c_char_p)
+
+
 
 def QC_prog(x):
-  with open(x, 'r') as file:
-    lines = file.readlines()
-    if Gaussian in lines:
-      filetype,stringtype='Gaussian',Gaussian
-    elif Qchem in lines:
-      filetype,stringtype='Q-Chem',Qchem
-    else:
-        filetype,stringtype='Non','Non'
-    global njobs
-    njobs = lines.count(stringtype)
+    filename = str(x).encode('utf-8')
+    result_size = ctypes.c_int(0)
+    for Prog in Progs:
+        string=Prog_key.get(Prog)
+        search_string = str(string).encode('utf-8')
+        result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
+        Prog_indexes = [result_ptr[i] for i in range(result_size.value)]
+        if Prog_indexes!=[]:
+            filetype=Prog
+            global njobs
+            njobs = len(Prog_indexes)-1
+    if Prog_indexes==[]:
+        filetype='Non'
     return filetype
   
 def index_Prog(x,filetype):
     string=Prog_key.get(filetype)
-    with open(x, 'r') as f:
-        lines=f.readlines()
-        indexes=[]
-        a=1
-        for row in lines:
-            a+=1
-            if row.find(string) != -1:
-                index=a
-                indexes.append(index)
+    filename = str(x).encode('utf-8')
+    search_string = str(string).encode('utf-8')
+    result_size = ctypes.c_int(0)
+    result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
+    indexes = [result_ptr[i] for i in range(result_size.value)]
     return indexes
   
 def ES_check(x,filetype):
     keyword=ES_key.get(filetype)
-    with open(x, 'r') as file:
-        lines=file.readlines()
-        nstates=0
-        ES_lines=[]
-        for num, line in enumerate(lines):
-            if keyword in line:
-                nstates+=1
-                ES_lines.append(num)
+    filename = str(x).encode('utf-8')
+    search_string = str(keyword).encode('utf-8')
+    result_size = ctypes.c_int(0)
+    result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
+    result = [result_ptr[i] for i in range(result_size.value)]
+    nstates=len(result)-1
     return nstates
 
 citePATH=PATH+'/cite'
@@ -130,9 +137,10 @@ if to_split != []:
             print(f'\nSplitting {name}...')
             filetype=QC_prog(x)
             indexes=index_Prog(x,filetype)
-            with open(x,'r') as file:
-                lines = file.readlines()
-            indexes.append(len(lines))
+            filename = str(x).encode('utf-8')
+            num_lines = ctypes.c_int(0)
+            lines_ptr = lib.export_lines(filename, ctypes.byref(num_lines))
+            lines = [lines_ptr[i].decode('utf-8') for i in range(num_lines.value)]
             for n in range(1,njobs+1):
                 sub_name=name.split(".")[0]+'(J'+str(n)+').out'
                 temp_files.append(sub_name)

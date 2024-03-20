@@ -100,7 +100,7 @@ if not temp_files==[]:
                 os.remove(x) 
 with open(citePATH) as f:
         exec(f.read())
-time.sleep(2)
+time.sleep(1)
 if csv:
         csvPATH=PATH+'/gen_csv'
         with open(csvPATH) as f:
