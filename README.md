@@ -1,5 +1,5 @@
 ## About
-UVeh-Vis is a utility designed for plotting UV-Vis spectra from Quantum Chemistry calculations (Qchem 5.x and Gaussian 16 supported). This tool operates by entry the relevant file(s), specifying the initial and final wavelength, and providing the standard deviation.
+UVeh-Vis is a python package designed for plotting UV-Vis spectra from Quantum Chemistry calculations (Qchem 5.x and Gaussian 16 supported). This tool operates by entry the relevant file(s), specifying the initial and final wavelength, and providing the standard deviation.
 
 ## Getting the source code
 
@@ -28,13 +28,10 @@ Please cite as:
 After getting the source code: 
 1. Run
 ```bash
-$ ./setup
+$ make
 ```
-2. Copy the final line from output
-3. Go to `/home/username`
-4. Paste the line into `.bashrc` file
-5. Exit terminal
-6. Open a new terminal and type
+2. Exit terminal
+3. Open a new terminal and type
 ```bash
 $ UVeh-Vis -h
 ```
