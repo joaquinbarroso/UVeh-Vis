@@ -32,9 +32,7 @@ if ltz:
 elif gaus:
         print('\nUsing Gaussian adjustment...')
         dist = 'GaussianAdj'
-else:
-        print('\nUsing Gaussian adjustment...')
-        dist = 'GaussianAdj'
+        
 print('\nCurrent deviation value is '+str(dev))
 Spec = Adj_key[dist]
 
@@ -62,11 +60,14 @@ if normal:
         print('\nNormalizing Spectra...')
         ABS_tot = [i/MAX for i in ABS_tot]
         plt.ylabel('Normalized Absorbance', size=15)
+        y=np.array([np.array(xi) for xi in ABS_tot])
+        MAX=y.max()
 else:
         plt.ylabel('$\\epsilon$ / $L$ $mol^{-1}$ $cm^{-1}$', size=15)
 for f in range (0,a):
         plt.plot(wavelenght,ABS_tot[f],label=datas[f].split(".")[0])
-if multip >= 0.0:             
+if multip >= 0.0:
+        print('\nCalculating coordinates of multiplicity flags...')           
         yval= []
         nm_range=[]
         multip_range=[]
@@ -99,7 +100,7 @@ if not temp_files==[]:
                 os.remove(x) 
 with open(citePATH) as f:
         exec(f.read())
-time.sleep(2)
+time.sleep(1)
 if csv:
         csvPATH=PATH+'/gen_csv'
         with open(csvPATH) as f:

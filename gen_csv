@@ -34,7 +34,6 @@ for row in MAT:
 output.append("")
 
 
-# Save the output to a file
 output_file_path = csv
 with open(output_file_path, 'w') as file:
     for line in output:

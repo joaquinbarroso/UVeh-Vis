@@ -3,21 +3,22 @@ import argparse
 import subprocess
 import os, sys
 import time
+import ctypes
 
 c = 2.998e8  # Speed of light in m/s
 h = 6.626e-34  # Planck's constant in J*s
 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
 
-parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemitry calculations of Excited states',
+parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemistry calculations of Excited states',
                                  epilog='Gaussian 09, 16 and Qchem 5.x files supported',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
 parser.add_argument("-wl", dest='wavelength', metavar='i,f', default='450,750' ,type=str, help="Starting (i) and final (f) wavelength in nm, separated by a comma (,)")
 parser.add_argument("-dev", dest='deviation', metavar='value', type=float, default=0.4, help="Standard deviation (eV)")
 parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, nargs="?", const='Output.csv', help="Creates a CSV file containing all file(s) absorbances. Default is 'default.csv'")
-parser.add_argument("-gau", "--gaussian", action='store_true', help="Plot the UV-Vis spectra with Gaussian adjustment (default)")
+parser.add_argument("-gau", "--gaussian", action='store_true', default=True, help="Plot the UV-Vis spectra with Gaussian adjustment")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
-parser.add_argument("-showm",dest='showmultiplicity', metavar='percentaje', type=float, nargs="?", const=0.5, help="Each peak is labeled with the multiplicity of the resulting excited state")
+parser.add_argument("-showm",dest='showmultiplicity', metavar='percentaje', type=float, nargs="?", const=0.5, default=-1, help="Each peak above the percentaje is labeled with the multiplicity of the resulting excited state")
 parser.add_argument("-nosplit", dest="nosplit", action='store_true', help="If a multiple job file is provided, it won't be splitted")
 args = parser.parse_args()
 
@@ -31,7 +32,6 @@ normal = args.normalized
 multip = args.showmultiplicity
 csv = args.table
 nosplit=args.nosplit
-print(multip)
 
 types = []
 unsupported_files = [] 
@@ -41,48 +41,54 @@ multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
 ES_key = {'Gaussian': ' f=', 'Q-Chem': 'Strength   :'}
 Prog_key = {'Gaussian':'            Gaussian, Inc.  All Rights Reserved.\n', 'Q-Chem': '                  Welcome to Q-Chem\n'}
 to_split=[]
-Gaussian,Qchem='            Gaussian, Inc.  All Rights Reserved.\n','                  Welcome to Q-Chem\n'
+Progs=['Gaussian','Q-Chem']
 temp_files=[]
 
 sys.path.append(os.getcwd())
 PATH=sys.path[0]
+lib_path=PATH+'/reader.so'
+lib = ctypes.CDLL(lib_path)
+
+lib.search_file.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
+lib.search_file.restype = ctypes.POINTER(ctypes.c_int)
+lib.export_lines.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
+lib.export_lines.restype = ctypes.POINTER(ctypes.c_char_p)
+
+
 
 def QC_prog(x):
-  with open(x, 'r') as file:
-    lines = file.readlines()
-    if Gaussian in lines:
-      filetype,stringtype='Gaussian',Gaussian
-    elif Qchem in lines:
-      filetype,stringtype='Q-Chem',Qchem
-    else:
-        filetype,stringtype='Non','Non'
-    global njobs
-    njobs = lines.count(stringtype)
+    filename = str(x).encode('utf-8')
+    result_size = ctypes.c_int(0)
+    for Prog in Progs:
+        string=Prog_key.get(Prog)
+        search_string = str(string).encode('utf-8')
+        result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
+        Prog_indexes = [result_ptr[i] for i in range(result_size.value)]
+        if Prog_indexes!=[]:
+            filetype=Prog
+            global njobs
+            njobs = len(Prog_indexes)-1
+    if Prog_indexes==[]:
+        filetype='Non'
     return filetype
   
 def index_Prog(x,filetype):
     string=Prog_key.get(filetype)
-    with open(x, 'r') as f:
-        lines=f.readlines()
-        indexes=[]
-        a=1
-        for row in lines:
-            a+=1
-            if row.find(string) != -1:
-                index=a
-                indexes.append(index)
+    filename = str(x).encode('utf-8')
+    search_string = str(string).encode('utf-8')
+    result_size = ctypes.c_int(0)
+    result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
+    indexes = [result_ptr[i] for i in range(result_size.value)]
     return indexes
   
 def ES_check(x,filetype):
     keyword=ES_key.get(filetype)
-    with open(x, 'r') as file:
-        lines=file.readlines()
-        nstates=0
-        ES_lines=[]
-        for num, line in enumerate(lines):
-            if keyword in line:
-                nstates+=1
-                ES_lines.append(num)
+    filename = str(x).encode('utf-8')
+    search_string = str(keyword).encode('utf-8')
+    result_size = ctypes.c_int(0)
+    result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
+    result = [result_ptr[i] for i in range(result_size.value)]
+    nstates=len(result)-1
     return nstates
 
 citePATH=PATH+'/cite'
@@ -131,9 +137,10 @@ if to_split != []:
             print(f'\nSplitting {name}...')
             filetype=QC_prog(x)
             indexes=index_Prog(x,filetype)
-            with open(x,'r') as file:
-                lines = file.readlines()
-            indexes.append(len(lines))
+            filename = str(x).encode('utf-8')
+            num_lines = ctypes.c_int(0)
+            lines_ptr = lib.export_lines(filename, ctypes.byref(num_lines))
+            lines = [lines_ptr[i].decode('utf-8') for i in range(num_lines.value)]
             for n in range(1,njobs+1):
                 sub_name=name.split(".")[0]+'(J'+str(n)+').out'
                 temp_files.append(sub_name)
