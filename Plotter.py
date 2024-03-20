@@ -4,8 +4,8 @@ import math as math
 import numpy as np
 
 def lotz(osc,nm,dev):
-       sup=1.3062974e8*(2/math.pi)**0.5*osc*(dev/1e7)
-       inf=((1/i)-(1/nm))**2+(dev/1e7)**2
+       sup=1.3062974e8*(2/math.pi)**0.5*osc*(dev/1e14)
+       inf=4*((1/i)-(1/nm))**2+(dev/1e7)**2
        global ABSn
        ABSn=sup/inf
        return ABSn
