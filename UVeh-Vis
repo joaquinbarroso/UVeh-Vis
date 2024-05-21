@@ -20,6 +20,7 @@ parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the 
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
 parser.add_argument("-showm",dest='showmultiplicity', metavar='percentaje', type=float, nargs="?", const=0.5, default=-1, help="Each peak above the percentaje is labeled with the multiplicity of the resulting excited state")
 parser.add_argument("-nosplit", dest="nosplit", action='store_true', help="If a multiple job file is provided, it won't be splitted")
+parser.add_argument("-prog", dest="Prog", action='store_true', help="Prints what program does UVeh-Vis recognizes for each file")
 parser.add_argument("-v","--version", action='version', version='%(prog)s 1.2')
 args = parser.parse_args()
 
@@ -33,6 +34,7 @@ normal = args.normalized
 multip = args.showmultiplicity
 csv = args.table
 nosplit=args.nosplit
+prog=args.Prog
 
 types = []
 unsupported_files = [] 
@@ -67,12 +69,12 @@ def QC_prog(x):
         search_string = str(string).encode('utf-8')
         result_ptr = lib.search_file(filename, search_string, ctypes.byref(result_size))
         Prog_indexes = [result_ptr[i] for i in range(result_size.value)]
-        if Prog_indexes!=[]:
+        if len(Prog_indexes)>=2:
             filetype=Prog
             global njobs
             njobs = len(Prog_indexes)-1
             break
-    if Prog_indexes==[]:
+    if len(Prog_indexes)<2:
         filetype='Non'
     return filetype
   
@@ -114,29 +116,30 @@ try:
     for file in datas:
         filename=file
         file = os.path.abspath(file)
-        f=open(file,'r')
-        if not os.path.isfile(file):
-            print(filename, ': is not a file')
+        if not os.path.exists(file):
+            print(f"Unable to open {filename}: {e}", file=sys.stderr)
             unsupported_files.append(filename)
         else:
-            filetype=QC_prog(file)
-            if filetype=='Non':
-                print(filename, ': Filetype not supported')
-                unsupported_files.append(filename)
-            else:
-                nstates=ES_check(file,filetype)
-                if nstates==0:
-                    print(filename, ': Error: No excited states found')
+                if not os.path.isfile(file):
+                    print(filename, ': is not a file')
                     unsupported_files.append(filename)
                 else:
-                    if njobs > 1:
-                        print(f'{filename}: File has {njobs} jobs')
-                        to_split.append(file)
-except OSError as e:
-    print(f"Unable to open {filename}: {e}", file=sys.stderr)
-    unsupported_files.append(filename)
+                    filetype=QC_prog(file)
+                    print(filetype)
+                    if filetype=='Non':
+                        print(filename, ': Filetype not supported')
+                        unsupported_files.append(filename)
+                    else:
+                        nstates=ES_check(file,filetype)
+                        if nstates==0:
+                            print(filename, ': Error: No excited states found')
+                            unsupported_files.append(filename)
+                        else:
+                            if njobs > 1:
+                                print(f'{filename}: File has {njobs} jobs')
+                                to_split.append(file)
 except Exception as e:
-    print("An error occurred:", e)
+    citeExit("An error occurred:"+ e)
 if to_split != []:
     if not nosplit:
         for x in to_split:
