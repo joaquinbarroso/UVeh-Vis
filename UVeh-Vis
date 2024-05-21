@@ -55,7 +55,9 @@ lib.search_file.restype = ctypes.POINTER(ctypes.c_int)
 lib.export_lines.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
 lib.export_lines.restype = ctypes.POINTER(ctypes.c_char_p)
 
-
+citePATH=PATH+'/cite'
+issuePATH=PATH+'/issue_info'
+PloPATH=PATH+'/Plotter.py'
 
 def QC_prog(x):
     filename = str(x).encode('utf-8')
@@ -69,6 +71,7 @@ def QC_prog(x):
             filetype=Prog
             global njobs
             njobs = len(Prog_indexes)-1
+            break
     if Prog_indexes==[]:
         filetype='Non'
     return filetype
@@ -92,14 +95,17 @@ def ES_check(x,filetype):
     nstates=len(result)-1
     return nstates
 
-citePATH=PATH+'/cite'
-issuePATH=PATH+'/issue_info'
-PloPATH=PATH+'/Plotter.py'
+def citeExit(err):
+    with open(citePATH) as f:
+        exec(f.read())
+    time.sleep(1)
+    print(err)
+    exit()
 
 if len(wl) == 1:
-    print("Error: You must provide a wavelength range separated by a comma e.g.  -wl 200,700")
+    citeExit("Error: You must provide a wavelength range separated by a comma e.g. -wl 200,700")
 elif not wl[0] < wl[1]:
-    print('Error: Initial wavelenght must be lower than final wavelenght')
+    citeExit('Error: Initial wavelenght must be lower than final wavelenght')
 lambda1 = wl[0]
 lambda2 = wl[1]
 
@@ -108,7 +114,8 @@ try:
     for file in datas:
         filename=file
         file = os.path.abspath(file)
-        if os.path.isdir(file):
+        f=open(file,'r')
+        if not os.path.isfile(file):
             print(filename, ': is not a file')
             unsupported_files.append(filename)
         else:
@@ -125,8 +132,8 @@ try:
                     if njobs > 1:
                         print(f'{filename}: File has {njobs} jobs')
                         to_split.append(file)
-except FileNotFoundError:
-    print(filename+': No such file or directory. Please enter a valid filename.')
+except OSError as e:
+    print(f"Unable to open {filename}: {e}", file=sys.stderr)
     unsupported_files.append(filename)
 except Exception as e:
     print("An error occurred:", e)
@@ -159,8 +166,6 @@ if to_split != []:
                 unsupported_files.append(x) 
     else:
         print("Multiple job files won't be splitted")   
-
-
 if unsupported_files==[]:
         print('\nFile(s) correctly processed')
 else:
@@ -171,11 +176,7 @@ else:
 if not datas==[]:
     print('\nChecking File(s)...Done')
 else:
-    with open(citePATH) as f:
-        exec(f.read())
-    time.sleep(1)
-    print('Error: None provided file(s) is supported, please check the errors above')
-    exit()
+    citeExit('Error: None provided file(s) is supported, please check the errors above')
 
 
 print('Saving Excited states info...\n')
@@ -217,8 +218,6 @@ for m in datas:
                     exec("osc_values_"+str(a)+".append(osc)")
     exec("all_osc.extend(osc_values_"+str(a)+")")
     exec("all_mult.append(mult_values_"+str(a)+")")
-#for i in types:
-    #print(i)       #Could be useful
 with open(PloPATH) as f:
     exec(f.read())
 
