@@ -1,5 +1,5 @@
 ## UVeh-Vis
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10988896.svg)](https://doi.org/10.5281/zenodo.10988896)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10988895.svg)](https://doi.org/10.5281/zenodo.10988895)
 ## About
 UVeh-Vis is a python package designed for plotting UV-Vis spectra from Quantum Chemistry calculations (Qchem 5.x and Gaussian 16 supported). This tool operates by entry the relevant file(s), specifying the initial and final wavelength, and providing the standard deviation.
 
