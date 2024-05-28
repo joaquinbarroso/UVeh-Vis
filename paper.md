@@ -33,7 +33,7 @@ bibliography: paper.bib
 Absorption spectroscopy is one of the most used analytical techniques due to
 the important information that can be obtained from the resulting spectra for 
 cualitative and cuantitative purposes. It is based on the absorption of electromagnetic
-radiation by a molecular system, this implies the trasition from an electronic 
+radiation by a molecular system, this implies the transition from an electronic 
 ground state to a higher energy state, an excited state [@Ceroni2014]. The characterization 
 and theoretical prediction of such states have been widely studied, the influence of
 an enormous amount of factors over their properties, and therefore, its spectrum,
