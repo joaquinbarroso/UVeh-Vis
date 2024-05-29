@@ -14,13 +14,14 @@ parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorp
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
 parser.add_argument("-wl", dest='wavelength', metavar='i,f', default='450,750' ,type=str, help="Starting (i) and final (f) wavelength in nm, separated by a comma (,)")
 parser.add_argument("-dev", dest='deviation', metavar='value', type=float, default=0.4, help="Standard deviation (eV)")
-parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, nargs="?", const='uveh_out.csv', help="Creates a CSV file containing all file(s) absorbances. Default is 'default.csv'")
+parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, nargs="?", const='uveh_out.csv', help="Creates a CSV file containing all file(s) absorbances. Default name is 'uveh_out.csv'")
 parser.add_argument("-gau", "--gaussian", action='store_true', default=True, help="Plot the UV-Vis spectra with Gaussian adjustment")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
 parser.add_argument("-showm",dest='showmultiplicity', metavar='percentaje', type=float, nargs="?", const=0.5, default=-1, help="Each peak above the percentaje is labeled with the multiplicity of the resulting excited state")
 parser.add_argument("-nosplit", dest="nosplit", action='store_true', help="If a multiple job file is provided, it won't be splitted")
-parser.add_argument("-v","--version", action='version', version='%(prog)s 1.2')
+parser.add_argument("-prog", dest="program", action='store_true', help="UVeh-Vis will print the format that each file is recognized")
+parser.add_argument("-v","--version", action='version', version='%(prog)s 1.2.2')
 args = parser.parse_args()
 
 datas = args.files
@@ -33,17 +34,19 @@ normal = args.normalized
 multip = args.showmultiplicity
 csv = args.table
 nosplit=args.nosplit
+program=args.program
 
+Progs=['Gaussian','Q-Chem','Orca']
+multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
+ES_key = {'Gaussian': ' f=', 'Q-Chem': 'Strength   :', 'Orca': 'STATE '}
+Prog_key = {'Gaussian':'            Gaussian, Inc.  All Rights Reserved.\n', 'Q-Chem': '                  Welcome to Q-Chem\n', 'Orca':'                                 * O   R   C   A *\n'}
 types = []
 unsupported_files = [] 
-all_osc=[]
 all_mult=[]
-multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
-ES_key = {'Gaussian': ' f=', 'Q-Chem': 'Strength   :'}
-Prog_key = {'Gaussian':'            Gaussian, Inc.  All Rights Reserved.\n', 'Q-Chem': '                  Welcome to Q-Chem\n'}
 to_split=[]
-Progs=['Gaussian','Q-Chem']
 temp_files=[]
+datasProg=[]
+all_nstates=[]
 
 sys.path.append(os.getcwd())
 PATH=sys.path[0]
@@ -115,7 +118,7 @@ try:
         filename=file
         file = os.path.abspath(file)
         if not os.path.exists(file):
-            print(f"Unable to open {filename}: {e}", file=sys.stderr)
+            print(f"Unable to open {filename}: No such file, please enter a valid filename")
             unsupported_files.append(filename)
         else:
                 if not os.path.isfile(file):
@@ -127,21 +130,25 @@ try:
                         print(filename, ': Filetype not supported')
                         unsupported_files.append(filename)
                     else:
+
                         nstates=ES_check(file,filetype)
                         if nstates==0:
-                            print(filename, ': Error: No excited states found')
+                            print(filename, ': Error: No excited states were found')
                             unsupported_files.append(filename)
                         else:
+                            datasProg.append(filetype)
+                            all_nstates.append(nstates)
                             if njobs > 1:
                                 print(f'{filename}: File has {njobs} jobs')
                                 to_split.append(file)
 except Exception as e:
     citeExit("An error occurred:"+ e)
+for file in unsupported_files:
+        datas.remove(file)
 if to_split != []:
     if not nosplit:
         for x in to_split:
             name=os.path.basename(x)
-            datas.remove(name)
             print(f'\nSplitting {name}...')
             filetype=QC_prog(x)
             indexes=index_Prog(x,filetype)
@@ -158,26 +165,27 @@ if to_split != []:
                     end=indexes[n]-2
                     for line in lines[start:end]:
                         file.write(line)
-        datas.extend(temp_files)
+            datasindex=datas.index(name)
+            datas.remove(name)
+            del datasProg[datasindex]
+            del all_nstates[datasindex]
         for x in temp_files:
             nstates=ES_check(x,filetype)
             if nstates==0:
-                print(x, ': No excited states found')
-                unsupported_files.append(x) 
+                print(x, ': No excited states were found')
+            else:
+                datas.append(x)
+                datasProg.append(filetype)
+                all_nstates.append(nstates)
     else:
         print("Multiple job files won't be splitted")   
 if unsupported_files==[]:
         print('\nFile(s) correctly processed')
-else:
-        for file in unsupported_files:
-            datas.remove(file)
-        unsupported_files=[]
 
 if not datas==[]:
     print('\nChecking File(s)...Done')
 else:
     citeExit('Error: None provided file(s) is supported, please check the errors above')
-
 
 print('Saving Excited states info...\n')
 a=0
@@ -185,12 +193,14 @@ for m in datas:
     m_name=m
     m = os.path.abspath(m)
     a+=1
+    datasindex=datas.index(m_name)
+    filetype=datasProg[datasindex]
+    nstates=all_nstates[datasindex]
     with open(m, 'r') as file:
         lines = file.readlines()
         exec("osc_values_"+str(a)+"= []")
         exec("nm_values_"+str(a)+"=[]")
         exec("mult_values_"+str(a)+"=[]")
-        filetype=QC_prog(m)
         if filetype=='Q-Chem':
             types.append(m_name+' is a Q-Chem output file')
             for num, line in enumerate(lines):
@@ -216,8 +226,26 @@ for m in datas:
                     mult = multiplicity.get(mult)
                     exec("mult_values_"+str(a)+".append(mult)")
                     exec("osc_values_"+str(a)+".append(osc)")
-    exec("all_osc.extend(osc_values_"+str(a)+")")
+        elif filetype=='Orca':
+            types.append(m_name+' is an Orca output file')
+            start=lines.index('         ABSORPTION SPECTRUM VIA TRANSITION ELECTRIC DIPOLE MOMENTS\n')+5
+            end=start+nstates
+            ESdata=lines[start:end]
+            if 'TD-DFT/TDA EXCITED STATES (SINGLETS)\n' in lines: multipl='Singlet'
+            else: multipl='Non'
+            for line in ESdata:
+                linefrag=line.split()
+                nm=float(linefrag[2])
+                osc=float(linefrag[3])
+                mult = multipl
+                mult = multiplicity.get(mult)
+                exec("nm_values_"+str(a)+".append(nm)")
+                exec("mult_values_"+str(a)+".append(mult)")
+                exec("osc_values_"+str(a)+".append(osc)")
     exec("all_mult.append(mult_values_"+str(a)+")")
+if program:
+    for x in types: print(x)
+if 'Orca' in datasProg: print('Warning: Triplet states cannot be plotted using Orca')
 with open(PloPATH) as f:
     exec(f.read())
 
