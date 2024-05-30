@@ -10,11 +10,12 @@ h = 6.626e-34  # Planck's constant in J*s
 ev_to_joules = 1.602e-28  # Conversion factor from eV to joules
 
 parser = argparse.ArgumentParser(prog="UVeh-Vis", description='Plotter of Absorption spectra using data of Quantum chemistry calculations of Excited states',
-                                 epilog='Gaussian 09, 16 and Qchem 5.x files supported',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                 epilog='Gaussian 09, 16, Qchem 5.x and Orca files supported',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces")
 parser.add_argument("-wl", dest='wavelength', metavar='i,f', default='450,750' ,type=str, help="Starting (i) and final (f) wavelength in nm, separated by a comma (,)")
 parser.add_argument("-dev", dest='deviation', metavar='value', type=float, default=0.4, help="Standard deviation (eV)")
 parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, nargs="?", const='uveh_out.csv', help="Creates a CSV file containing all file(s) absorbances. Default name is 'uveh_out.csv'")
+parser.add_argument("-incsv", dest="incsv", metavar='filename.csv', type=str,help="Creates a CSV file containing all file(s) absorbances. Default name is 'uveh_out.csv'")
 parser.add_argument("-gau", "--gaussian", action='store_true', default=True, help="Plot the UV-Vis spectra with Gaussian adjustment")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
@@ -33,6 +34,7 @@ gaus = args.gaussian
 normal = args.normalized
 multip = args.showmultiplicity
 csv = args.table
+incsv = args.incsv
 nosplit=args.nosplit
 program=args.program
 
@@ -246,6 +248,39 @@ for m in datas:
 if program:
     for x in types: print(x)
 if 'Orca' in datasProg: print('Warning: Triplet states cannot be plotted using Orca')
+if incsv:
+    if not os.path.exists(incsv):
+            print(f"Unable to open {incsv}: No such csv file, please enter a valid filename\nIgnoring -incsv command")
+    else:
+        if not os.path.isfile(incsv):
+            print(incsv, ': is not a file\nIgnoring -incsv command')
+        else:
+            table=[]
+            xcsv=[]
+            ycsv=[]
+            with open(incsv, 'r') as filecsv:
+                lines=filecsv.readlines()
+                for line in lines:
+                    if line[0].isdigit():
+                        table.append(line)
+                if not table==[]:
+                    evline=table[0].rstrip()
+                    if not evline.split()[0]==evline:
+                        csvtype="()"
+                    elif not evline.split(',')[0]==evline:
+                        csvtype="""(',')"""
+                    else:
+                        csvtype='Non'
+                else:
+                    csvtype='Non'
+                if not csvtype=='Non':
+                    for line in table:
+                        line=line.rstrip()
+                        exec('sepline=line.split'+csvtype)
+                        xcsv.append(sepline[0])
+                        ycsv.append(sepline[1])
+                else:
+                    print(f'Error: {incsv} . Please make sure it has a valid csv format. \nIgnoring -incsv command')
 with open(PloPATH) as f:
     exec(f.read())
 
