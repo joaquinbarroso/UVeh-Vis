@@ -65,7 +65,8 @@ coming from TDA/TDDFT and RAS-CI calculations.
 #Key Features
 ##Parameter personalization
 The user can set the wavelenght range, the deviation value and ask for the plot to be normalized
-$$\varepsilon=\sum_i^n\varepsilon_i^{max}e^{-(\frac{\widetilde{\nu}-\widetilde\nu_i}{\sigma})^2} \label{gaussian}$$
+$$\varepsilon(\widetilde{\nu})=\sum_i^n\varepsilon_i^{max}e^{-(\frac{\widetilde{\nu}-\widetilde\nu_i}{\sigma})^2} \label{gaussian}$$
+$$\varepsilon(\widetilde{\nu})=\sqrt{\frac{2}{\pi}}\sum_i^n\varepsilon_i^{max}\frac{\sigma}{4(\widetilde{\nu}-\widetilde\nu_i)^2+\sigma^2}$$
 ##Distribution settings
 Absorption spectra can be calculated using either Lorentzian ang Gaussian adjustment
 ##Embebed program recognition routine
