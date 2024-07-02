@@ -62,5 +62,16 @@ program offers an easy-to-use execution and installation for Computational chemi
 related and non-related users. Currently, `UVeh-Vis` can handle excited states information
 coming from TDA/TDDFT and RAS-CI calculations.
 
+#Key Features
+##Parameter personalization
+The user can set the wavelenght range, the deviation value and ask for the plot to be normalized
+$$a^n + b^n = c^n \label{fermat}$$
+##Distribution settings
+Absorption spectra can be calculated using either Lorentzian ang Gaussian adjustment
+##Embebed program recognition routine
+Excited states info can be recognized from the supported programs automatically 
+##Several jobs file support
+
+
 
 
