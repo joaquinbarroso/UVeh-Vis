@@ -92,6 +92,10 @@ if multip >= 0.0:
         for x in range(0,len(yval)):
                 if yval[x] > min_val:
                         plt.text(nm_range[x],yval[x],multip_range[x])
+if incsv:
+       plt.plot(x_csv,y_csv,label=incsv.split(".")[0])
+       if wavelenght[0]<x_csv[0] or wavelenght[-1]>x_csv[-1]:
+               print(f'Warning: Plot wavelenght range is out of {incsv} wavelenght range, discontinuities would be shown')
 plt.legend(edgecolor='None')
 plt.xlabel('Wavelenght / nm', size=15)
 plt.xlim(lambda1,lambda2)
@@ -105,6 +109,4 @@ if csv:
         csvPATH=PATH+'/gen_csv'
         with open(csvPATH) as f:
             exec(f.read())
-        plt.show()
-else:
-        plt.show()
+plt.show()
