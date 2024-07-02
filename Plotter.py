@@ -18,7 +18,7 @@ def gau(osc,nm,dev):
 deviation=(float(dev)*ev_to_joules*1e7)/(h*c)
 lambda1=int(lambda1)
 lambda2=int(lambda2)
-max_f=max(all_osc)
+
 a=len(datas)
 ABS_tot=[]
 Adj_key={'GaussianAdj': gau , 'LorentzianAdj' : lotz}
