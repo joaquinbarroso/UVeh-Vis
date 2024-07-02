@@ -1,5 +1,5 @@
 ---
-title: 'UVeh-Vis: A Python program for Absorption spectra plotting form QC calculations'
+title: 'UVeh-Vis: A Python program for Absorption spectra plotting from QC calculations'
 tags:
   - Python
   - Chemistry
@@ -46,14 +46,21 @@ information from quantum chemical calculations in oder to plot UV-Vis spectra.
 
 Excited states and UV-Vis spectra calculations have become a daily basis task done 
 when working with light-driven reactions or processes in molecular systems, it 
-comes with a constant task comparison between UV-Vis spectra of different systems 
+comes with a constant task of comparising between UV-Vis spectra of different systems 
 (or methods), for this, `UVeh-Vis` is a very useful python program that facilitates
 such tasks, it is focused on the obtention of UV-Vis spectra using excited states
 information extracted from quantum chemical output files through an easy-to-use
 and customizable execution. Through an auxiliary C-based code, it accelerates its
-reading and writting routines. 
+reading and writting routines. Several projects with the same objective have
+been published on github or gitlab, but, none of them offers the variety of options
+and personalization that our code offers.
 
 `UVeh-Vis` is capable of processing several files obtained from renowned quantum
-chemistry packages, such as Gaussiand and Q-chem, and produce an UV-Vis plot, 
+chemistry packages, such as Orca, Gaussian and Q-chem, and produce an UV-Vis plot
+from extracted data using other option to modify and fit such plot as needed. Our
+program offers an easy-to-use execution and installation for Computational chemistry
+related and non-related users. Currently, `UVeh-Vis` can handle excited states information
+coming from TDA/TDDFT and RAS-CI calculations.
+
 
 
