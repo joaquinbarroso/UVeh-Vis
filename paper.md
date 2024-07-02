@@ -65,7 +65,7 @@ coming from TDA/TDDFT and RAS-CI calculations.
 #Key Features
 ##Parameter personalization
 The user can set the wavelenght range, the deviation value and ask for the plot to be normalized
-$$a^n + b^n = c^n \label{fermat}$$
+$$\varepsilon=\sum_i^n\varepsilon_i^{max}e^{-(\frac{\widetilde{\nu}-\widetilde\nu_i}{\sigma})^2} \label{gaussian}$$
 ##Distribution settings
 Absorption spectra can be calculated using either Lorentzian ang Gaussian adjustment
 ##Embebed program recognition routine
