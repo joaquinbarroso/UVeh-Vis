@@ -15,7 +15,7 @@ parser.add_argument("files", nargs="+", help="Input file(s), separated by spaces
 parser.add_argument("-wl", dest='wavelength', metavar='i,f', default='450,750' ,type=str, help="Starting (i) and final (f) wavelength in nm, separated by a comma (,)")
 parser.add_argument("-dev", dest='deviation', metavar='value', type=float, default=0.4, help="Standard deviation (eV)")
 parser.add_argument("-csv", dest="table", metavar='filename.csv', type=str, nargs="?", const='uveh_out.csv', help="Creates a CSV file containing all file(s) absorbances. Default name is 'uveh_out.csv'")
-parser.add_argument("-incsv", dest="incsv", metavar='filename.csv', type=str,help="Creates a CSV file containing all file(s) absorbances. Default name is 'uveh_out.csv'")
+parser.add_argument("-incsv", dest="incsv", metavar='filename.csv', type=str,help="Reads an existing CSV file that constains and Absorption spectra and adds it to the plot")
 parser.add_argument("-gau", "--gaussian", action='store_true', default=True, help="Plot the UV-Vis spectra with Gaussian adjustment")
 parser.add_argument("-ltz", "--lorentzian", action='store_true', help="Plot the UV-Vis spectra with Lorenztian adjustment")
 parser.add_argument("-norm", "--normalized", action='store_true', help="Y values are normalized to the highest peak of all lines")
@@ -250,14 +250,15 @@ if program:
 if 'Orca' in datasProg: print('Warning: Triplet states cannot be plotted using Orca')
 if incsv:
     if not os.path.exists(incsv):
-            print(f"Unable to open {incsv}: No such csv file, please enter a valid filename\nIgnoring -incsv command")
+            print(f"Unable to open {incsv}: No such csv file, please enter a valid filename\nWarning: -incsv command will be ignored")
     else:
         if not os.path.isfile(incsv):
-            print(incsv, ': is not a file\nIgnoring -incsv command')
+            print(incsv, ': is not a file\nWarning: -incsv command will be ignored')
         else:
             table=[]
             xcsv=[]
             ycsv=[]
+            y_csv=[]
             with open(incsv, 'r') as filecsv:
                 lines=filecsv.readlines()
                 for line in lines:
@@ -279,8 +280,16 @@ if incsv:
                         exec('sepline=line.split'+csvtype)
                         xcsv.append(sepline[0])
                         ycsv.append(sepline[1])
+                    x_csv = [eval(i) for i in xcsv]
+                    y_val = [eval(i) for i in ycsv]
+                    ymax=max(y_val)
+                    for y in y_val:
+                        yn=y/ymax
+                        y_csv.append(yn)
+                    print('Warning: Spectra will be normalized for visualization purposes')
+                    normal=True
                 else:
-                    print(f'Error: {incsv} . Please make sure it has a valid csv format. \nIgnoring -incsv command')
+                    print(f'Error: {incsv} . Please make sure it has a valid csv format. \nWarning: -incsv command will be ignored')
 with open(PloPATH) as f:
     exec(f.read())
 
