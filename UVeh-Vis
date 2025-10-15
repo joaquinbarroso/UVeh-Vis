@@ -41,7 +41,7 @@ program=args.program
 Progs=['Gaussian','Q-Chem','Orca']
 multiplicity = {'Singlet': 'S', 'Triplet': 'T', 'Quintet': 'Q'}
 ES_key = {'Gaussian': ' f=', 'Q-Chem': 'Strength   :', 'Orca': 'STATE '}
-Prog_key = {'Gaussian':'            Gaussian, Inc.  All Rights Reserved.\n', 'Q-Chem': '                  Welcome to Q-Chem\n', 'Orca':'                                 * O   R   C   A *\n'}
+Prog_key = {'Gaussian':'Gaussian, Inc.  All Rights Reserved', 'Q-Chem': '                  Welcome to Q-Chem\n', 'Orca':'                                 * O   R   C   A *\n'}
 types = []
 unsupported_files = [] 
 all_mult=[]
